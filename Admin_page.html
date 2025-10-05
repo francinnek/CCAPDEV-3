@@ -47,6 +47,7 @@
         </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="confirm" class="btn btn-primary">Confirm Selection</button>
       </div>
     </div>
   </div>
@@ -97,7 +98,30 @@
     <script>
     $(function(){
         $("#flightButo").click(function(){
-            var flightInfo = `
+
+        var flightTable = `
+          <table class="table">
+          <thead>
+          <tr>
+           <th scope="col">#</th>
+           <th scope="col">From</th>
+           <th scope="col">To</th>
+           <th scope="col">Details</th>
+          </tr>
+          </thead>
+          
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Manila</td>
+      <td>HongKong</td>
+      <td>
+        <p class="d-inline-flex gap-1">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#multiCollapseExample1" aria-expanded="false" aria-controls="multiCollapseExample1">See details</button>
+        </button>
+          </p>
+           <div class="collapse" id="multiCollapseExample1">
+            <div class="card card-body">
             <h2>Reservation #1</h2>
             <p>Flight number: CX0101 <br>
             MNL -> HKG <br>
@@ -105,8 +129,23 @@
             Date Dec 12 2023 <br>
             Seat: 20J <br>
             Gate: 12 <br>
-            Boaeding Time:10:15am</p>
-            
+            Boarding Time:10:15am</p>
+          </div>
+         </div>
+        </td>
+
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Manila</td>
+      <td>Cebu</td>
+      <td>
+          <p class="d-inline-flex gap-1">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">See details</button>
+        </button>
+          </p>
+           <div class="collapse" id="multiCollapseExample2">
+            <div class="card card-body">
             <h2>Reservation #2</h2>
             <p>Flight number: CX608 <br>
              Manila -> Cebu <br>
@@ -114,8 +153,22 @@
             Date May 26 2024 <br>
             Seat: 60H <br>
             Gate: 42 <br>
-            Boaeding Time:13:25pm</p>
-            
+            Boarding Time:13:25pm</p>
+          </div>
+         </div>
+        </td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td>Cebu</td>
+      <td>Manila</td>
+      <td>
+                  <p class="d-inline-flex gap-1">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#multiCollapseExample3" aria-expanded="false" aria-controls="multiCollapseExample3">See details</button>
+        </button>
+          </p>
+           <div class="collapse" id="multiCollapseExample3">
+            <div class="card card-body">
             <h2>Reservation #3</h2>
             <p>Flight number: CX725 <br>
              Cebu -> Manila <br>
@@ -123,20 +176,22 @@
             Date June 01 2024 <br>
             Seat: 69C <br>
             Gate: 8 <br>
-            Boaeding Time:13:40pm</p>
+            Boarding Time:13:40pm</p>
+        </td>
+        </tr>
+       </tbody>
+      </table>
+           `; 
+
+          $('#modal-body').html(flightTable);
+
+          flightModal = new bootstrap.Modal(document.getElementById('flightModal'));
+          flightModal.show();
             
-            `;
-
-            
-
-            $('#modal-body').html(flightInfo);
-
-        
-            flightModal = new bootstrap.Modal(document.getElementById('flightModal'));
-            flightModal.show();
     });
 
     }); 
     </script>
 </body>
 </html>
+
