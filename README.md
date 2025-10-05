@@ -1,3 +1,5 @@
+For file organization, please let's not use the main branch unless everything is ready to be merged and pass. Create new branch for each requirement. Thank you.
+
 # **CCAPDEV Term 1, AY 2025 – 2026**
 
 ## Machine Project – Project Specifications Document
