@@ -1,11 +1,11 @@
 # **CCAPDEV Term 1, AY 2025 – 2026**
 
-Machine Project – Project Specifications Document
+## Machine Project – Project Specifications Document
 
-**Groupings:****** At most 4 members in a group
+**Groupings: At most 4 members in a group**
 
 
-**Online Airline Ticketing System**
+## **Online Airline Ticketing System**
 
 
 # **Project Overview**
