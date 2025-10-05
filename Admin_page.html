@@ -22,13 +22,13 @@
 
       <li class="nav-item">
     <button class="btn btn-primary me-md-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
-      User
+      User Management
     </button>
       </li>
 
         <li class="nav-item">
       <button type="button" class="btn btn-info" id="flightButo">
-      Flight
+      Flight (Other Page)
       </button>
 
       
@@ -98,13 +98,36 @@
     $(function(){
         $("#flightButo").click(function(){
             var flightInfo = `
-            <p>Flight number: CX0101</p>
-            <p> MNL -> HKG </p>
-            <p>Name:Wilson</p>
-            <p>Date Dec 12 2023</p>
-            <p>Seat: 20J</p>
-            <p>Gate: 12</p>
-            <p>Boaeding Time:10:15am</p>`;
+            <h2>Reservation #1</h2>
+            <p>Flight number: CX0101 <br>
+            MNL -> HKG <br>
+            Name:Wilson <br>
+            Date Dec 12 2023 <br>
+            Seat: 20J <br>
+            Gate: 12 <br>
+            Boaeding Time:10:15am</p>
+            
+            <h2>Reservation #2</h2>
+            <p>Flight number: CX608 <br>
+             Manila -> Cebu <br>
+            Name:Wilson <br>
+            Date May 26 2024 <br>
+            Seat: 60H <br>
+            Gate: 42 <br>
+            Boaeding Time:13:25pm</p>
+            
+            <h2>Reservation #3</h2>
+            <p>Flight number: CX725 <br>
+             Cebu -> Manila <br>
+            Name:Wilson <br>
+            Date June 01 2024 <br>
+            Seat: 69C <br>
+            Gate: 8 <br>
+            Boaeding Time:13:40pm</p>
+            
+            `;
+
+            
 
             $('#modal-body').html(flightInfo);
 
