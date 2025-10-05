@@ -68,18 +68,15 @@ Design the **front-end user interface** for the airline ticketing system. Focus 
    - Ensure **responsive design** for desktop and mobile.
 
    - Provide a clear **navigation bar** with links: _Search Flights, Book Flight, My Reservations, Profile_
+  
+
+   
 
 **IMPORTANT:** Note that for every instance of a create feature that adds data in the database of the web application, there should be corresponding features that will allow the corresponding user to read, update, and delete the data from the database. For example, if you have a feature that allows the user to create a post, the user should also be allowed to read/view the post, update/edit the post, and delete/remove the post.
-
-\
-
 
 **WORKING WITH GROUPMATES**
 
 For this project, you are encouraged to work in groups of at most 4 members. Make sure that each member of the group has approximately the same amount of contribution for the project. Problems with groupmates must be discussed internally within the group, and if needed, with the lecturer.
-
-\
-
 
 **USE OF AI**
 
