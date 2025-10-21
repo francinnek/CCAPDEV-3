@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>DLSU Airlines</title>
+        <!-- Imports/Links -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="availFlights.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a href="search_page.html" class="active">Search Flights</a>
+                <a href="availFlights.html">Book Flight</a>
+                <a href="reservations_page.html">My Reservations</a>
+                <a href="Admin_page.html">Profile</a>
+            </nav>
+        </header>
+        <div class="container logo-container text-center py-5">
+            <img src="DLSU-Airlines.png" class="logo-image img-fluid mb-4" alt="DLSU Airlines">
+            <p id="page-text"><br><br>DLSU Airline's list of available flights</p>
+        </div>
+        
+        <div class="flights-container container px-4 py-5">
+            <!-- Manila to Tokyo -->
+            <div class="card flight-card">
+                <!-- <div class="card-body"> -->
+                    <div class="route">
+                        <span class="country">Manila (MNL)</span> → <span class="country">Tokyo (NRT)</span>
+                    </div>
+                    <h6 class="card-subtitle flight-details">PR 0928 -- Philippine Airlines</h6>
+                    <div class="card-text">
+                        <div class="flight-info">
+                            <p>Departure: <br>September 05, 2025 | 08:00 AM</p>
+                            <p>Arrival: <br>September 05, 2025 | 11:00 PM</p>
+                        </div>
+                    </div>
+                    <p class="card-text flight-price">$420</p>
+                <!-- </div> -->
+            </div>
+
+            <!-- Cebu to Singapore -->
+            <div class="card flight-card">
+                <div class="route">
+                    <span class="country">Cebu (CEB)</span> → <span class="country">Singapore (SIN)</span>
+                </div>
+                <p class="flight-details">5J 0671 -- Cebu Pacific</p>
+                <div class="flight-info">
+                    <p>Departure: <br>October 04, 2025 | 10:15 AM</p>
+                    <p>Arrival: <br>October 05, 2025 | 13:45 PM</p>
+                </div>
+                <p class="flight-price">$420</p>
+            </div>
+
+            <!-- Dubai to Manila -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Dubai (DXB)</span> → <span class="country">Manila (MNL)</span>
+                </div>
+                <p class="flight-details">EK 0334 -- Emirates</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 03:20 AM</p>
+                    <p>Arrival: <br>September 05, 2025 | 16:50 PM</p>
+                </div>
+                <p class="flight-price">$710</p>
+            </div>
+
+            <!-- Seoul to Clark -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Seoul (ICN)</span> → <span class="country">Clark (CRK)</span>
+                </div>
+                <p class="flight-details">EK 0334 -- Korean Air</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 13:10 PM</p>
+                    <p>Arrival: <br>September 05, 2025 | 16:40 PM</p>
+                </div>
+                <p class="flight-price">$290</p>
+            </div>
+
+            <!-- Manila to Davao -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Manila (MNL)</span> → <span class="country">Davao (DVO)</span>
+                </div>
+                <p class="flight-details">PR 0455 -- Philippine Airlines</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 07:30 AM</p>
+                    <p>Arrival: <br>September 05, 2025 | 09:15 PM</p>
+                </div>
+                <p class="flight-price">$85</p>
+            </div>
+
+            <!-- Singapore to Cebu -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Singapore (SIN)</span> → <span class="country">Cebu (CEB)</span>
+                </div>
+                <p class="flight-details">SQ 0915 -- Singapore Airlines</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 19:20 PM</p>
+                    <p>Arrival: <br>September 05, 2025 | 22:55 PM</p>
+                </div>
+                <p class="flight-price">$380</p>
+            </div>
+
+            <!-- Manila to Doha -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Manila (MNL)</span> → <span class="country">Doha (DOH)</span>
+                </div>
+                <p class="flight-details">QR 0932 -- Qatar Airways</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 23:05 PM</p>
+                    <p>Arrival: <br>September 06, 2025 | 04:45 AM</p>
+                </div>
+                <p class="flight-price">$620</p>
+            </div>
+
+            <!-- Tokyo to Manila -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Tokyo (HND)</span> → <span class="country">Manila (MNL)</span>
+                </div>
+                <p class="flight-details">EK 0334 -- ANA (All Nippon Airways)</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 18:45 AM</p>
+                    <p>Arrival: <br>September 05, 2025 | 22:30 PM</p>
+                </div>
+                <p class="flight-price">$450</p>
+            </div>
+
+            <!-- Davao to Manila -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">Davao (DVO)</span> → <span class="country">Manila (MNL)</span>
+                </div>
+                <p class="flight-details">5J 0120 -- Cebu Pacific</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 16:00 AM</p>
+                    <p>Arrival: <br>September 05, 2025 | 17:45 PM</p>
+                </div>
+                <p class="flight-price">$78</p>
+            </div>
+
+            <!-- San Francisco to Manila -->
+            <div class="flight-card">
+                <div class="route">
+                    <span class="country">San Francisco (SFO)</span> → <span class="country">Manila (MNL)</span>
+                </div>
+                <p class="flight-details">UA 0180 -- United Airlines</p>
+                <div class="flight-info">
+                    <p>Departure: <br>September 05, 2025 | 22:15 PM</p>
+                    <p>Arrival: <br>September 07, 2025 | 06:10 PM</p>
+                </div>
+                <p class="flight-price">$1,050</p>
+            </div>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Get search parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchOrigin = urlParams.get('origin');
+    const searchDestination = urlParams.get('destination');
+    const searchDate = urlParams.get('departure');
+    const passengers = urlParams.get('passengers');
+
+    // Update page title with search criteria
+    if (searchOrigin && searchDestination) {
+        $('#page-text').html(`<br><br>Available flights from ${searchOrigin} to ${searchDestination}`);
+    }
+
+    // Filter flight cards based on search criteria
+    $('.flight-card').each(function() {
+        const routeText = $(this).find('.route').text();
+        const originMatch = routeText.toLowerCase().includes(searchOrigin?.toLowerCase());
+        const destMatch = routeText.toLowerCase().includes(searchDestination?.toLowerCase());
+
+        // Show only matching flights
+        if (searchOrigin && searchDestination) {
+            $(this).toggle(originMatch && destMatch);
+        }
+
+        // Append Book Now button if not already there
+        if ($(this).find('.book-now').length === 0) {
+            $(this).append(`
+                <div class="text-center mb-3">
+                    <button class="btn btn-success book-now">Book Now</button>
+                </div>
+            `);
+        }
+    });
+
+    // Show message if no flights found
+    if ($('.flight-card:visible').length === 0) {
+        $('.flights-container').prepend(
+            `<div class="alert alert-info" role="alert">
+                No flights found for your search criteria. Please try different dates or destinations.
+            </div>`
+        );
+    }
+
+    // Book Now button click event
+    $(document).on('click', '.book-now', function(e) {
+        e.stopPropagation(); // Prevent any parent click events
+
+        // Get flight details from card
+        const card = $(this).closest('.flight-card');
+        const route = card.find('.route').text().trim();
+        const airline = card.find('.flight-details').text().trim();
+        const departure = card.find('.flight-info p').first().text().replace('Departure: ', '').trim();
+        const arrival = card.find('.flight-info p').last().text().replace('Arrival: ', '').trim();
+        const price = card.find('.flight-price').text().replace('$', '').trim();
+
+        // Build URL parameters
+        const params = new URLSearchParams({
+            origin: searchOrigin,
+            destination: searchDestination,
+            searchDeparture: searchDate,
+            passengers: passengers,
+            route: route,
+            airline: airline,
+            flightDeparture: departure,
+            flightArrival: arrival,
+            price: price
+        });
+
+        // Redirect to reservation form
+        window.location.href = `reservationform.html?${params.toString()}`;
+    });
+});
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,153 @@
+:root {
+  --primary-color: #4CAF50; 
+  --secondary-color: #2E7D32; 
+  --light-bg: #f8f9fa;
+  --text-color: black; 
+  --light-grey: #666; 
+}
+
+body {
+  background-color: var(--light-bg);
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  color: var(--text-color);
+}
+
+header {
+  background-color: var(--primary-color); 
+  color: white;
+  padding: 1rem 2rem;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  margin-left: 10px;
+}
+
+.header-logo {
+  height: 40px;
+  width: auto;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+}
+
+nav a {
+  color: white;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+nav a.active {
+  font-weight: bold;
+  border-bottom: 2px solid white;
+  padding-bottom: 5px;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  padding-bottom: 100px; /* Increased from 70px to 100px for more space above footer */
+  flex-direction: column; 
+}
+
+.logo-container {
+  text-align: center;
+  margin: 40px auto;
+  padding: 1px;
+  width: 100%;
+  max-width: 650px; 
+}
+
+.logo-image {
+  max-width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+  width: 100%;
+  max-width: 650px;
+  margin-bottom: 20px; /* Added margin at the bottom of the form */
+}
+
+h3 {
+    color: var(--secondary-color); 
+    font-weight: bold;
+}
+
+label {
+  font-weight: 500;
+  color: var(--light-grey); 
+}
+
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25); 
+}
+
+.btn-primary {
+  background-color: var(--primary-color); 
+  border-color: var(--primary-color);
+  font-weight: bold;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+#result {
+  font-weight: bold;
+  color: red; 
+  margin-top: 1rem;
+  text-align: center;
+}
+
+footer {
+  background-color: var(--primary-color); 
+  color: white;
+  text-align: center;
+  padding: 0.8rem;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}

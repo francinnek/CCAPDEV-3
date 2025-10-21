@@ -1,0 +1,116 @@
+:root {
+  --primary-color: #4CAF50; 
+  --secondary-color: #2E7D32; 
+  --light-bg: #f8f9fa;
+  --text-color: black; 
+  --light-grey: #666; 
+}
+
+header {
+  background-color: var(--primary-color); 
+  color: white;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+nav a {
+  color: white;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+nav a.active {
+    font-weight: bold;
+    border-bottom: 2px solid white;
+    padding-bottom: 5px;
+}
+
+.logo-container {
+    text-align: center;
+    margin: 40px auto;
+    padding: 20px;
+    width: 100%;
+}
+
+.logo-image {
+    max-width: 300px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+#page-text {
+    text-align: center;
+    font-size: 1.3em;
+    color: black;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+.flights-container {
+    width: 90%;
+    margin: -80px auto 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+.flight-card {
+    border: 2px solid #4CAF50;
+    border-radius: 12px;
+    padding: 15px;
+    background-color: white;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.flight-card:hover {
+    transform: translateY(-5px);
+}
+
+.route {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.country {
+    color: #666;
+    font-weight: bold;
+}
+
+.flight-details {
+    font-style: italic;
+    color: #4CAF50;
+    margin: 8px 0;
+}
+
+.flight-info {
+    color: #555;
+    font-size: 0.95em;
+    line-height: 1.4;
+    margin: 10px 0;
+}
+
+.flight-info p {
+    margin-bottom: 8px;
+}
+
+.flight-price {
+    font-weight: bold;
+    color: #2E7D32;
+    font-size: 1.2em;
+    text-align: right;
+    margin-top: auto;
+    padding-top: 10px;
+}

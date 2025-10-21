@@ -1,0 +1,252 @@
+:root {
+    --primary-color: #4CAF50; 
+    --secondary-color: #2E7D32; 
+    --light-bg: #f8f9fa;
+    --text-color: black; 
+    --light-grey: #666; 
+}
+
+body {
+    background-color: var(--light-bg);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    color: var(--text-color);
+    min-height: 100vh;
+    padding-bottom: 150px; /* Increased to provide more space between content and footer */
+}
+
+header {
+    background-color: var(--primary-color); 
+    color: white;
+    padding: 1rem 2rem;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    margin-left: 10px;
+}
+
+.header-logo {
+    height: 40px;
+    width: auto;
+}
+
+.container {
+    width: 50%;
+    margin: 50px auto 0;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    max-width: 650px;
+}
+
+.containerCol {
+    width: 70%
+}
+
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25); 
+}
+
+.submit-btn {
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+    margin-top: 4rem;
+    margin-bottom: 0; 
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 100px;
+}
+
+.modal-body hr {
+    margin: 1.5rem -1.5rem;
+    border-color: #dee2e6;
+}
+
+#summaryText {
+    margin-bottom: 1.5rem;
+}
+.modal-footer {
+    width: 50%;
+}
+
+.dropdown-toggle {
+    margin-bottom: 20px;
+}
+
+.btn-success {
+    margin-top: 10px;
+    padding: 7px;
+    background-color: var(--primary-color); 
+    border-color: var(--primary-color);
+    font-weight: bold;
+}
+
+.btn-success:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.xtrabaggage {
+    width: 80px;
+    margin-left: -25px;
+}
+
+.section-title {
+    margin-bottom: 20px;
+    margin-top: 0px;
+}
+
+.secondary {
+    margin-top: 20px;
+}
+
+.tertiary {
+    margin-top: 20px;
+}
+
+.xtra-name {
+    margin-left: -25px;
+}
+
+.flight-title {
+    text-align: left; /* Align with the form content */
+    margin-bottom: 40px;
+}
+
+/* Logo */
+.logo-container {
+    text-align: center;
+    margin: 40px auto;
+    padding: 1px;
+    width: 100%;
+    max-width: 650px; 
+}
+
+.logo-image {
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.logo-rimage {
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Meal Option */
+.meal-option {
+    margin-bottom: 9px;
+}
+
+/* Flight Layout Styling */
+.flight-layout {
+    width: 50%; /* Match the container width */
+    margin: 50px auto 0; /* Match the container margin */
+    padding: 2rem;
+    position: relative;
+    background-color: white;
+    border-radius: 12px;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.grid-square {
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+    margin: 2px;
+}
+
+.grid-container {
+    max-width: 400px;
+    margin: auto;
+}
+
+.grid-container:last-of-type {
+    margin-bottom: 5rem; /* Increased bottom margin for the last grid container */
+}
+
+/* Seat Styling */
+.border {
+    padding: 10px;
+    border-radius: 3.5px;
+    width: 5px;
+}
+
+.hover-effect:hover {
+    background-color: lightblue;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.selected {
+    background-color: #198754 !important;
+    color: white;
+}
+
+/* This is a duplicate definition and has been removed.
+   The proper .submit-btn definition is now in the Form Elements section above */
+
+/* Footer Styling */
+footer {
+    background-color: var(--primary-color); 
+    color: white;
+    text-align: center;
+    padding: 0.8rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}

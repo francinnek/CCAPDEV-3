@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLSU Airlines</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .loading-container {
+            text-align: center;
+        }
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #4CAF50;
+        }
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
+        .loading-spinner {
+            margin-top: 20px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4CAF50;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <img src="app/dlsu-airlines.png" alt="DLSU Airlines Logo" class="logo">
+        <div class="loading-text">Welcome to DLSU Airlines</div>
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // Redirect to the login page after a short delay
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                window.location.href = 'app/loginform.html';
+            }, 1500); // 1.5 second delay for a smooth transition
+        });
+    </script>
+</body>
+</html>

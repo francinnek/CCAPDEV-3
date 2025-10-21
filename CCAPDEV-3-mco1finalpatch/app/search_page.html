@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" content="Group 3">
+  <meta name="description" content="Online Airline Ticketing Flight Search Page">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Search | Online Airline Ticketing System</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <link rel="stylesheet" href="search_page.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <img src="DLSU-Airlines.png" class="header-logo" alt="DLSU Airlines Logo">
+        <h1>DLSU Airlines</h1>
+      </div>
+      <nav>
+        <a href="search_page.html" class="active">Search Flights</a>
+        <a href="availFlights.html">Book Flight</a>
+        <a href="reservations_page.html">My Reservations</a>
+        <a href="Admin_page.html">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="logo-container">
+      <img src="DLSU-Airlines.png" class="logo-image" alt="DLSU Airlines Logo">
+    </div>
+    <section id="flight-search-section">
+      <form id="flightForm">
+        <!-- <h3 class="text-center mb-4">Flights</h3> -->
+        <div class="row">
+          <div class="col-md-6">
+            <label for="origin" class="form-label">Origin</label>
+            <input type="text" id="origin" name="origin" class="form-control" placeholder="Enter city" required>
+          </div>
+          <div class="col-md-6">
+            <label for="destination" class="form-label">Destination</label>
+            <input type="text" id="destination" name="destination" class="form-control" placeholder="Enter city" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <label for="departure" class="form-label">Departure Date</label>
+            <input type="date" id="departure" name="departure" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label for="return" class="form-label">Return Date</label>
+            <input type="date" id="return" name="return" class="form-control">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <label for="passengers" class="form-label">Passenger Count</label>
+            <input type="number" id="passengers" name="passengers" class="form-control" min="1" value="1" required>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <input type="submit" value="Search Flights" class="btn btn-primary mt-3">
+        </div>
+
+        <div id="result"></div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; MCO1 Online Airline Ticketing System | GROUP 3</p>
+  </footer>
+
+  <script>
+    $(document).ready(function(){
+      $("#flightForm").on("submit", function(event){
+        event.preventDefault();
+
+        const origin = $("#origin").val();
+        const destination = $("#destination").val();
+        const departure = $("#departure").val();
+        const returnDate = $("#return").val();
+        const passengers = $("#passengers").val();
+
+        if(origin === "" || destination === "" || departure === ""){
+          $("#result").text("Please fill in all required fields.");
+        } else {
+          const searchParams = new URLSearchParams({
+            origin: origin,
+            destination: destination,
+            departure: departure,
+            return: returnDate,
+            passengers: passengers
+          });
+  
+          window.location.href = `availFlights.html?${searchParams.toString()}`;
+        }
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
