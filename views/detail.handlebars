@@ -1,0 +1,15 @@
+<div class="reservations-container">
+    <h2>Reservation Details</h2>
+    
+    <div class="card p-3">
+        <h5 class="card-title text-success">Reservation Details</h5>
+        <p><strong>Passenger:</strong> {{booking.name}}</p>
+        <p><strong>Email:</strong> {{booking.email}}</p>
+        <p><strong>Seat:</strong> {{booking.selectedSeat}}</p>
+        <p><strong>Route:</strong> {{booking.origin}} to {{booking.destination}}</p>
+        <p><strong>Departure:</strong> {{booking.flightDeparture}}</p>
+        <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+        
+        <a href="/reservations" class="btn btn-secondary mt-3">Back to List</a>
+    </div>
+</div>

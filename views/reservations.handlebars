@@ -1,0 +1,127 @@
+<div class="reservations-container">
+    <h2 id="page-title">My Reservations</h2>
+
+    <div id="booking-list">
+        {{#if bookings}}
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each bookings}}
+                    <tr>
+                        <td>{{@index}}</td>
+                        <td>{{this.origin}}</td>
+                        <td>{{this.destination}}</td>
+                        <td>
+                            <button class="btn btn-primary view-details" data-id="{{this._id}}">View Details</button>
+                            <button class="btn btn-danger cancel-booking" data-id="{{this._id}}">Cancel</button>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        {{else}}
+            <p class="text-center">No reservations found.</p>
+        {{/if}}
+    </div>
+
+    <div id="booking-details" style="display: none;">
+        <div id="details-content"></div>
+        <button id="backToList" class="btn btn-secondary mt-3">Back to List</button>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    // Use AJAX to load bookings 
+    function loadBookings() {
+        $.get('/bookings')
+            .done(function(data) {
+                displayBookingList(data);
+            })
+            .fail(function() {
+                alert('Error loading reservations');
+            });
+    }
+
+    function displayBookingList(bookings) {
+        let table = `
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (let i = 0; i < bookings.length; i++) {
+            let b = bookings[i];
+            table += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${b.origin}</td>
+                    <td>${b.destination}</td>
+                    <td>
+                        <button class="btn btn-primary view-details" data-id="${b._id}">View Details</button>
+                        <button class="btn btn-danger cancel-booking" data-id="${b._id}">Cancel</button>
+                    </td>
+                </tr>`;
+        }
+
+        table += `</tbody></table>`;
+        $("#booking-list").html(table).show();
+        $("#booking-details").hide();
+        $("#page-title").text("My Reservations");
+    }
+
+    $(document).on("click", ".view-details", function () {
+        const id = $(this).data("id");
+        $.get('/bookings/' + id)
+            .done(function(b) {
+                $("#details-content").html(`
+                    <div class="card p-3">
+                        <h5 class="card-title text-success">Reservation Details</h5>
+                        <p><strong>Passenger:</strong> ${b.name}</p>
+                        <p><strong>Email:</strong> ${b.email}</p>
+                        <p><strong>Seat:</strong> ${b.selectedSeat}</p>
+                        <p><strong>Route:</strong> ${b.origin} to ${b.destination}</p>
+                        <p><strong>Departure:</strong> ${b.flightDeparture}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                    </div>
+                `);
+                $("#booking-list").hide();
+                $("#booking-details").show();
+                $("#page-title").text("Reservation Details");
+            });
+    });
+
+    $(document).on("click", ".cancel-booking", function () {
+        if (!confirm('Cancel this booking?')) return;
+        const id = $(this).data("id");
+        $.post('/reservations/' + id + '/cancel')
+            .done(function() {
+                alert('Booking cancelled!');
+                loadBookings(); 
+            });
+    });
+
+    $("#backToList").click(function () {
+        $("#booking-list").show();
+        $("#booking-details").hide();
+        $("#page-title").text("My Reservations");
+    });
+
+    // Load bookings on page load
+    loadBookings();
+});
+</script>

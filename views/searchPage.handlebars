@@ -1,0 +1,65 @@
+<div class="logo-container">
+  <img src="/sprites/dlsu-airlines.png" class="logo-image" alt="DLSU Airlines Logo">
+</div>
+<section id="flight-search-section">
+  <form id="flightForm">
+    <!-- <h3 class="text-center mb-4">Flights</h3> -->
+    <div class="row">
+      <div class="col-md-6">
+        <label for="origin" class="form-label">Origin</label>
+        <input type="text" id="origin" name="origin" class="form-control" placeholder="Enter city" required>
+      </div>
+      <div class="col-md-6">
+        <label for="destination" class="form-label">Destination</label>
+        <input type="text" id="destination" name="destination" class="form-control" placeholder="Enter city" required>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <label for="departure" class="form-label">Departure Date</label>
+        <input type="date" id="departure" name="departure" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label for="return" class="form-label">Return Date</label>
+        <input type="date" id="return" name="return" class="form-control">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <label for="passengers" class="form-label">Passenger Count</label>
+        <input type="number" id="passengers" name="passengers" class="form-control" min="1" value="1" required>
+      </div>
+    </div>
+    <div class="text-center">
+      <input type="submit" value="Search Flights" class="btn btn-primary mt-3">
+    </div>
+    <div id="result"></div>
+  </form>
+</section>
+
+
+<script>
+  $(document).ready(function(){
+    $("#flightForm").on("submit", function(event){
+      event.preventDefault();
+      const origin = $("#origin").val();
+      const destination = $("#destination").val();
+      const departure = $("#departure").val();
+      const returnDate = $("#return").val();
+      const passengers = $("#passengers").val();
+      if(origin === "" || destination === "" || departure === ""){
+        $("#result").text("Please fill in all required fields.");
+      } else {
+        const searchParams = new URLSearchParams({
+          origin: origin,
+          destination: destination,
+          departure: departure,
+          return: returnDate,
+          passengers: passengers
+        });
+
+        window.location.href = `avail?${searchParams.toString()}`;
+      }
+    });
+  });
+</script>
