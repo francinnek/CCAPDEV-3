@@ -8,9 +8,11 @@ MVC/
 │   └── database.js
 ├── controllers/
 │   └── available_flightsController.js
+|   └── bookingController.js (added) 
 ├── models/
 │   ├── Available_Flight.js
 │   └── Booking.js
+|     
 ├── public/
 │   └── styles/
 │       └── main.css
