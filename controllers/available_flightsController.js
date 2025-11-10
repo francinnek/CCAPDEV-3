@@ -39,7 +39,7 @@ router.post('/search', async (req, res) => {
         });
     }
 });
-
+/*
 router.get('/avail', async (req, res) => {
     try {
         const flights = await Flight.find({}).lean();
@@ -56,6 +56,42 @@ router.get('/avail', async (req, res) => {
             title: 'Server Error',
             message: 'Error loading flights page'
         });
+    }
+});
+*/
+
+router.get('/avail', async (req, res) => {
+    try {
+        const { origin, destination, departure } = req.query; // ← ADDED: Get from URL query
+        let searchQuery = {};
+        
+        // Add search filters if provided
+        if (origin) {
+            searchQuery.origin = { $regex: origin, $options: 'i' };
+        }
+        
+        if (destination) {
+            searchQuery.destination = { $regex: destination, $options: 'i' };
+        }
+        
+        if (departure) {
+            searchQuery.departure_date = departure; 
+        }
+
+        // sort by price
+        const flights = await Flight.find(searchQuery).sort({ price: 1 }).lean();
+        
+        //Render with search context for page title
+        res.render('availableFlights', {
+            title: 'Available Flights',
+            active: { book: true },
+            flights: flights,
+            searchOrigin: origin,
+            searchDestination: destination
+        });
+    } catch (error) {
+        console.error('Error fetching flights:', error);
+        res.status(500).json({ error: 'Failed to fetch flights' });
     }
 });
 

@@ -6,10 +6,11 @@ const exphbs = require('express-handlebars');
 const connectDb = require('./config/database');
 
 const Available_Flight = require('./controllers/available_flightsController');
-const loginRegController = require('./routes/loginRoutes');
+// const loginRegController = require('./routes/loginRoutes');
+const BookingController = require('./controllers/bookingController');
 
 const Booking = require('./models/Booking');
-const Profile = require('./models/Profile');
+//const Profile = require('./models/Profile');
 // const Flight = require('./models/Available_Flight');
 
 const app = express();
@@ -50,17 +51,24 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+// the picture
+app.use('/sprites', express.static(path.join(__dirname, 'views/sprites')));
 
 // ===================== ROUTES ======================
 app.use('/flights', Available_Flight);
-app.use('/loginOrRegister', loginRegController);
+// app.use('/loginOrRegister', loginRegController);
+app.use('/bookings', BookingController);
 
 // app.get('/search', (req, res) => res.sendFile(path.join(__dirname, 'search_page.html'))); 
 // app.get('/avail',  (req, res) => res.sendFile(path.join(__dirname, 'availFlights.html'))); 
 // app.get('/form',   (req, res) => res.sendFile(path.join(__dirname, 'reservationform.html'))); 
-
+/*
 app.get('/', (req, res) => {
     res.redirect('/loginOrRegister/login'); 
+});
+*/
+app.get('/', (req, res) => {
+    res.redirect('/reservations'); 
 });
 
 app.get('/form', (req, res) => {
@@ -102,17 +110,9 @@ app.get('/admin', async (req, res) => {
 
 
 // Bowen's routes
-app.get('/reservations', async (req, res) => {
-    try {
-        const bookings = await Booking.find({ status: 'confirmed' }).lean();
-        res.render('reservations', { 
-            title: 'My Reservations - DLSU Airlines',
-            bookings: bookings
-        });
-    } catch (err) {
-        res.status(500).send('Error retrieving reservations');
-    }
-});
+app.use('/bookings', BookingController);
+
+
 
 app.get('/bookings', async (req, res) => {
     try {
@@ -135,6 +135,23 @@ app.get('/bookings/:id', async (req, res) => {
         res.status(400).json({ error: 'Invalid booking ID' });
     }
 });
+
+
+
+// Show My Reservations page
+app.get('/reservations', async (req, res) => {
+    try {
+        const bookings = await Booking.find({ status: 'confirmed' }).lean();
+        res.render('reservations', {
+            title: 'My Reservations - DLSU Airlines',
+            active: { reservations: true },
+            bookings: bookings
+        });
+    } catch (err) {
+        res.status(500).send('Error');
+    }
+});
+
 
 // Detail page for a single reservation
 app.get('/reservations/:id', async (req, res) => {
@@ -198,6 +215,8 @@ connectDb()
 
     app.listen(PORT, async () => {
       console.log('🚀 DLSU Airlines Server Started Successfully!');
+      const url = `http://localhost:${PORT}`;
+      console.log(`Server is running at ${url}`);
       console.log('='.repeat(50));
     });
   })

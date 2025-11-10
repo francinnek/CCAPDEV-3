@@ -1,3 +1,6 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="logo-container">
     <img src="/sprites/dlsu-airlines.png" class="logo-image" alt="DLSU Airlines">
 </div>
@@ -189,22 +192,107 @@
     <button type="submit" class="btn btn-success submit-btn mt-3 ms-3">Submit</button>
 </div>
 <!--Summary Panel: Summary will be filled by JQuery-->
+
 <div class="modal fade" id="cartModal" tabindex="-1">
-<div class="modal-dialog">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title">Purchase Summary</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-    </div>
-    <div class="modal-body">
-      <!-- Order summary will be filled in with jQuery -->
-      <p id="summaryText"></p>
-      <hr>
-      <h5 class="mb-0">Total: <span id="totalAmount"></span></h5>
-    </div>
-    <div class="modal-footer d-flex justify-content-end align-items-center">
-      <button class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
-      <button class="btn btn-success">Submit</button>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Purchase Summary</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Order summary will be filled in with jQuery -->
+        <div id="summaryText"></div>
+        <hr>
+        <h5 class="mb-0">Total: <span id="totalAmount"></span></h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="confirmSubmit" class="btn btn-success">Confirm</button>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    let selectedSeat = null;
+
+    // 1. SEAT CLICK → Turn green
+    $('.hover-effect').click(function() {
+        $('.hover-effect').removeClass('selected');
+        $(this).addClass('selected');
+        selectedSeat = $(this).closest('.row').find('.seatAisle').last().text().trim() + 
+                      $(this).index() + 1;
+        console.log('Selected seat:', selectedSeat);
+    });
+
+    // 2. MEAL CLICK → Change button text
+    $('.dropdown-item').click(function(e) {
+        e.preventDefault();
+        const meal = $(this).data('value');
+        $('.dropdown-toggle').text(meal);
+    });
+
+    // 3. SUBMIT BUTTON → Open modal + show summary
+    $('.submit-btn').click(function(e) {
+        e.preventDefault();
+        
+        // Get data from URL
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Fill summary
+        $('#summaryText').html(`
+            <p><strong>Name:</strong> ${$('#name').val() || 'Not entered'}</p>
+            <p><strong>Email:</strong> ${$('#email').val() || 'Not entered'}</p>
+            <p><strong>Passport:</strong> ${$('#passportId').val() || 'Not entered'}</p>
+            <p><strong>From:</strong> ${urlParams.get('origin') || 'Not specified'}</p>
+            <p><strong>To:</strong> ${urlParams.get('destination') || 'Not specified'}</p>
+            <p><strong>Flight:</strong> ${urlParams.get('airline') || 'Not specified'}</p>
+            <p><strong>Seat:</strong> ${selectedSeat || 'Not selected'}</p>
+            <p><strong>Meal:</strong> ${$('.dropdown-toggle').text()}</p>
+            <p><strong>Extra Bags:</strong> ${$('#extraBaggage').val() || 0}</p>
+        `);
+
+        const basePrice = parseFloat(urlParams.get('price')) || 0;
+        const baggageCost = (parseInt($('#extraBaggage').val()) || 0) * 60;
+        const total = basePrice + baggageCost;
+        $('#totalAmount').text('$' + total);
+
+        // Open modal
+        $('#cartModal').modal('show');
+    });
+
+    // 4. FINAL CONFIRM → Save booking (FIXED ID)
+    $('#confirmSubmit').click(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const booking = {
+            name: $('#name').val(),
+            email: $('#email').val(),
+            passportId: $('#passportId').val(),
+            selectedSeat: selectedSeat || 'Not selected',
+            mealOption: $('.dropdown-toggle').text(),
+            extraBaggage: parseInt($('#extraBaggage').val()) || 0,
+            origin: urlParams.get('origin'),
+            destination: urlParams.get('destination'),
+            airline: urlParams.get('airline'),
+            flightDeparture: urlParams.get('flightDeparture'),
+            flightArrival: urlParams.get('flightArrival'),
+            price: parseFloat(urlParams.get('price')) || 0
+        };
+
+        console.log('Submitting booking:', booking);
+
+        $.post('/bookings', booking)
+            .done(function() {
+                alert('Booking Confirmed!');
+                window.location.href = '/reservations';
+            })
+            .fail(function(err) {
+                console.error('Booking error:', err);
+                alert('Error: ' + (err.responseJSON?.error || 'Try again'));
+            });
+    });
+});
+</script>

@@ -1,3 +1,5 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <div class="container logo-container text-center py-5">
   <img src="/sprites/dlsu-airlines.png" class="logo-image img-fluid mb-4" alt="DLSU Airlines">
   <p id="page-text"><br><br>DLSU Airline's list of available flights</p>
@@ -43,102 +45,31 @@
 
 <script>
 $(document).ready(function() {
-  // Get search parameters from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const searchOrigin = urlParams.get('origin');
-  const searchDestination = urlParams.get('destination');
-  const searchDate = urlParams.get('departure');
-  const passengers = urlParams.get('passengers');
-
-  // Update page title with search criteria
-  if (searchOrigin && searchDestination) {
-    $('#page-text').html(`<br><br>Available flights from ${searchOrigin} to ${searchDestination}`);
-    
-    // Filter flights based on search criteria (client-side filtering as fallback)
-    $('.flight-card').each(function() {
-      const cardOrigin = $(this).data('origin');
-      const cardDestination = $(this).data('destination');
-      
-      if (cardOrigin && cardDestination) {
-        const originMatch = cardOrigin.toLowerCase().includes(searchOrigin.toLowerCase());
-        const destMatch = cardDestination.toLowerCase().includes(searchDestination.toLowerCase());
-        
-        $(this).toggle(originMatch && destMatch);
-      }
-    });
-  }
-
-<script>
-  $(document).ready(function() {
     // Get search parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const searchOrigin = urlParams.get('origin');
     const searchDestination = urlParams.get('destination');
-    const searchDate = urlParams.get('departure');
-    const passengers = urlParams.get('passengers');
 
     // Update page title with search criteria
     if (searchOrigin && searchDestination) {
         $('#page-text').html(`<br><br>Available flights from ${searchOrigin} to ${searchDestination}`);
     }
 
-    // Filter flight cards based on search criteria
-    $('.flight-card').each(function() {
-        const routeText = $(this).find('.route').text();
-        const originMatch = routeText.toLowerCase().includes(searchOrigin?.toLowerCase());
-        const destMatch = routeText.toLowerCase().includes(searchDestination?.toLowerCase());
-
-        // Show only matching flights
-        if (searchOrigin && searchDestination) {
-            $(this).toggle(originMatch && destMatch);
-        }
-
-        // Append Book Now button if not already there
-        if ($(this).find('.book-now').length === 0) {
-            $(this).append(`
-                <div class="text-center mb-3">
-                    <button class="btn btn-success book-now">Book Now</button>
-                </div>
-            `);
-        }
-    });
-
-    // Show message if no flights found
-    if ($('.flight-card:visible').length === 0) {
-        $('.flights-container').prepend(
-            `<div class="alert alert-info" role="alert">
-                No flights found for your search criteria. Please try different dates or destinations.
-            </div>`
-        );
-    }
-
     // Book Now button click event
     $(document).on('click', '.book-now', function(e) {
-        e.stopPropagation(); // Prevent any parent click events
+        e.preventDefault();
 
-        // Get flight details from card
-        const card = $(this).closest('.flight-card');
-        const route = card.find('.route').text().trim();
-        const airline = card.find('.flight-details').text().trim();
-        const departure = card.find('.flight-info p').first().text().replace('Departure: ', '').trim();
-        const arrival = card.find('.flight-info p').last().text().replace('Arrival: ', '').trim();
-        const price = card.find('.flight-price').text().replace('$', '').trim();
-
-        // Build URL parameters
+        const btn = $(this);
         const params = new URLSearchParams({
-            origin: searchOrigin,
-            destination: searchDestination,
-            searchDeparture: searchDate,
-            passengers: passengers,
-            route: route,
-            airline: airline,
-            flightDeparture: departure,
-            flightArrival: arrival,
-            price: price
+            origin: btn.data('origin'),
+            destination: btn.data('destination'),
+            airline: btn.data('airline'),
+            flightDeparture: btn.data('departure'),
+            flightArrival: btn.data('arrival'),
+            price: btn.data('price')
         });
 
-        // Redirect to reservation form
-        window.location.href = `reservationForm?${params.toString()}`;
+        window.location.href = `/form?${params.toString()}`;
     });
 });
 </script>

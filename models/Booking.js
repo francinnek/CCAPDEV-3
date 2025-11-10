@@ -38,7 +38,11 @@ const bookingSchema = new mongoose.Schema({
     status: {
         type: String,
         default: 'confirmed'
-    }
+    },
+    extraBaggage: {
+    type: Number,
+    default: 0
+    },
 }, {
     timestamps: true
 });

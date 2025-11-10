@@ -387,7 +387,11 @@ label {
     margin-bottom: 1.5rem;
 }
 .modal-footer {
-    width: 50%;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
 }
 
 .dropdown-toggle {
@@ -491,3 +495,4 @@ label {
     background-color: #198754 !important;
     color: white;
 }
+
