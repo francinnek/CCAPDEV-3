@@ -23,6 +23,10 @@ const bookingSchema = new mongoose.Schema({
         type: String,
         default: 'Standard'
     },
+    extraBaggage: {
+        type: Number,
+        default: 0
+    },
     origin: {
         type: String,
         required: true
@@ -34,15 +38,13 @@ const bookingSchema = new mongoose.Schema({
     airline: String,
     flightDeparture: String,
     flightArrival: String,
-    price: Number,
+    flightPrice: Number,
+    baggagePrice: Number,
+    totalPrice: Number,
     status: {
         type: String,
         default: 'confirmed'
-    },
-    extraBaggage: {
-    type: Number,
-    default: 0
-    },
+    }
 }, {
     timestamps: true
 });
