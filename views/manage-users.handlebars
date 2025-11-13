@@ -1,0 +1,125 @@
+<div class="container reservations-container">
+  <h1>User Management</h1>
+
+  {{#if message}}
+    <div class="alert alert-success">{{message}}</div>
+  {{/if}}
+
+  <div class="users-table">
+    {{#if users.length}}
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Member</th>
+            <th>Admin</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each users}}
+          <tr>
+            <td>{{inc @index}}</td>
+            <td>{{this.fullName}}</td>
+            <td>{{this.username}}</td>
+            <td>{{this.email}}</td>
+            <td>
+              {{#if this.isMember}}
+                <span class="badge bg-success">Yes</span>
+              {{else}}
+                <span class="badge bg-secondary">No</span>
+              {{/if}}
+            </td>
+            <td>
+              {{#if this.isAdmin}}
+                <span class="badge bg-warning text-dark">Admin</span>
+              {{else}}
+                <span class="badge bg-light text-dark">User</span>
+              {{/if}}
+            </td>
+            <td>{{formatDate this.createdAt}}</td>
+            <td>
+              
+              {{#if (neq this._id ../profile._id)}}
+                <button class="btn btn-danger btn-sm"
+                        onclick="deleteUser('{{this._id}}', '{{../username}}')">
+                  Delete
+                </button>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <p class="text-center no-data">No users found.</p>
+    {{/if}}
+  </div>
+
+  <div class="back-link mt-4">
+  <a href="/admin/flights?user={{username}}" class="btn back-green-btn">
+    ← Back to Flight Management
+  </a>
+</div>
+
+
+
+<script>
+function deleteUser(userId, username) {
+  if (!confirm('Delete this user? This cannot be undone.')) return;
+
+  fetch(`/admin/users/${userId}?user=${encodeURIComponent(username)}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert('Error deleting user: ' + (data.message || 'Unknown error'));
+    }
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('Error deleting user');
+  });
+}
+</script>
+
+<style>
+/* Keep styles aligned with your Reservations / green theme */
+.reservations-container .table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.reservations-container .table td .btn { margin-right: 6px; }
+.reservations-container .table td .btn:last-child { margin-right: 0; }
+
+.no-data { color: var(--light-grey); }
+
+.back-green-btn {
+    background-color: var(--primary-color);  /* same green theme */
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 6px;
+    display: inline-block;
+    text-decoration: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.back-green-btn:hover {
+    background-color: var(--secondary-color); /* darker hover */
+    border-color: var(--secondary-color);
+    color: white;
+    text-decoration: none;
+}
+
+</style>
