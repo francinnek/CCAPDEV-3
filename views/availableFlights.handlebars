@@ -1,0 +1,52 @@
+<div class="container logo-container text-center py-5">
+  <img src="/sprites/dlsu-airlines.png" class="logo-image img-fluid mb-4" alt="DLSU Airlines">
+  <p id="page-text"><br><br>DLSU Airline's list of available flights</p>
+
+  {{#if isAdmin}}
+    <div class="text-center my-4">
+      <a href="/admin/flights/create{{#if profile.username}}?user={{profile.username}}{{/if}}" class="btn btn-success btn-lg">
+        + Add New Flight
+      </a>
+    </div>
+  {{/if}}
+</div>
+
+<div class="flights-container container px-4 py-5" {{#if profile.username}}data-username="{{profile.username}}"{{/if}}>
+  {{#if flights.length}}
+    {{#each flights}}
+      <div class="card flight-card" data-origin="{{this.origin}}" data-destination="{{this.destination}}">
+        <div class="route">
+          <span class="country">{{this.origin}}</span> → 
+          <span class="country">{{this.destination}}</span>
+        </div>
+        <h6 class="card-subtitle flight-details">{{this.flightNumber}} -- {{this.airline}}</h6>
+        <div class="card-text">
+          <div class="flight-info">
+            <p>Departure: <br>{{this.departure_date}} | {{this.departure_time}}</p>
+            <p>Arrival: <br>{{this.arrival_date}} | {{this.arrival_time}}</p>
+          </div>
+        </div>
+        <p class="card-text flight-price">${{this.price}}</p>
+        <div class="text-center mb-3">
+          <a href="/form?price={{this.price}}&origin={{this.origin}}&destination={{this.destination}}&airline={{this.airline}}&flightDeparture={{this.departure_date}}&flightArrival={{this.arrival_date}}{{#if ../profile.username}}&user={{../profile.username}}{{/if}}" class="btn btn-success book-now" 
+                  data-flight-id="{{this._id}}"
+                  data-origin="{{this.origin}}"
+                  data-destination="{{this.destination}}"
+                  data-flight-number="{{this.flightNumber}}"
+                  data-airline="{{this.airline}}"
+                  data-departure="{{this.departure_date}} {{this.departure_time}}"
+                  data-arrival="{{this.arrival_date}} {{this.arrival_time}}"
+                  data-price="{{this.price}}">
+            Book Now
+          </a>
+        </div>
+      </div>
+    {{/each}}
+  {{else}}
+    <div class="alert alert-info" role="alert">
+      No flights found.
+    </div>
+  {{/if}}
+</div>
+
+<script src="/js/availableFlights.js"></script>
