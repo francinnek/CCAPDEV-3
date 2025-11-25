@@ -1,0 +1,59 @@
+<div class="reservations-container">
+    <h2 id="page-title">My Reservations</h2>
+
+    {{#if bookings}}
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Airline</th>
+                    <th>Departure</th>
+                    <th>Seat</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each bookings}}
+                <tr>
+                    <td>{{@index}}</td>
+                    <td>{{this.origin}}</td>
+                    <td>{{this.destination}}</td>
+                    <td>{{this.airline}}</td>
+                    <td>{{this.flightDeparture}}</td>
+                    <td>{{this.selectedSeat}}</td>
+                    <td>
+                        <span class="badge bg-success">{{this.status}}</span>
+                    </td>
+                    <td>
+                        <a href="/reservations/{{this._id}}{{#if ../profile.username}}?user={{../profile.username}}{{/if}}" class="btn btn-primary btn-sm">View Details</a>
+                        <a href="/bookings/{{this._id}}/edit{{#if ../profile.username}}?user={{../profile.username}}{{/if}}" class="btn btn-warning btn-sm">Modify</a>
+                        <form action="/reservations/{{this._id}}/cancel" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" 
+                                    onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                Cancel
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    {{else}}
+        <div class="alert alert-info text-center">
+            {{#if profile}}
+                <p>You have no reservations yet.</p>
+                <p><a href="/flights/avail?user={{profile.username}}" class="btn btn-primary btn-sm">Book a Flight</a></p>
+            {{else}}
+                <p>Please log in to view your reservations.</p>
+                <p><a href="/loginOrRegister/login" class="btn btn-primary btn-sm">Log In</a></p>
+            {{/if}}
+        </div>
+    {{/if}}
+</div>
+
+<script>
+
+</script>
