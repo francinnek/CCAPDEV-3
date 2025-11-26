@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const Profile = require('../models/Profile');
+const Booking = require('../models/Booking');
+const validation = require('../utils/validation');
 
 // 🔐 Pre-save hook to hash password before saving
 async function hashPassword(password) {
@@ -27,10 +29,38 @@ const authController = {
     login: async (req, res) => {
         try {
             const { username, password } = req.body;
-            const user = await validateUser(username, password);
+
+            // SERVER-SIDE VALIDATION
+            if (!username || !password) {
+                return res.render('loginform', { 
+                    error: 'Username and password are required' 
+                });
+            }
+
+            // Validate username format
+            const usernameValidation = validation.validateUsername(username);
+            if (!usernameValidation.isValid) {
+                return res.render('loginform', { 
+                    error: usernameValidation.error 
+                });
+            }
+
+            // Validate password is not empty
+            if (typeof password !== 'string' || password.length === 0) {
+                return res.render('loginform', { 
+                    error: 'Password cannot be empty' 
+                });
+            }
+
+            if (password.length > 128) {
+                return res.render('loginform', { 
+                    error: 'Invalid password format' 
+                });
+            }
+
+            const user = await validateUser(usernameValidation.sanitized, password);
 
             if (user) {
-                // req.session.userId = user._id;
                 req.session.user = {
                     id: user._id,
                     username: user.username,
@@ -41,14 +71,8 @@ const authController = {
                     isMember: user.isMember
                 };
             
-                console.log(`✅ User successfully logged in: ${username}`);
-                res.redirect(`/admin?user=${encodeURIComponent(username)}`); 
-                /* encodeURIComponent: A built-in JavaScript function that URL-encodes 
-                                       (percent-encodes) component values, making them 
-                                       safe to insert into a query string or a single URI component.
-                    
-                    Example: "John/Doe@example" -> John%2FDoe%40example
-                */
+                console.log(`✅ User successfully logged in: ${user.username}`);
+                res.redirect(`/admin?user=${encodeURIComponent(user.username)}`); 
 
             } else {
                 console.log(`❌ User log in unsuccessful: ${username}`);
@@ -75,9 +99,19 @@ const authController = {
                 confPassword
             } = req.body;
 
-            if (password !== confPassword) {
+            //SERVER-SIDE VALIDATION using validation.js
+            const registrationValidation = validation.validateRegistrationData({
+                fullName,
+                username,
+                birthday,
+                email,
+                password,
+                confPassword
+            });
+
+            if (!registrationValidation.isValid) {
                 return res.render('register', {
-                    error: 'Passwords do not match',
+                    error: registrationValidation.errors.join(', '),
                     formData: { fullName, username, birthday, email }
                 });
             }
@@ -134,11 +168,29 @@ const authController = {
         });
     },
 
-    // Handles the password change
     changePassword: async (req, res) => {
         try {
             const { username, currentPassword, newPassword, confirmPassword } = req.body;
             console.log(`🔐 Password change attempt for: ${username}`);
+
+            //SERVER-SIDE VALIDATION
+            if (!username || !currentPassword || !newPassword || !confirmPassword) { 
+                return res.render('change-password', {
+                    title: 'Change Password - DLSU Airlines', 
+                    error: 'All fields are required',
+                    username: username
+                });
+            }
+
+            // Validate password 
+            const passwordValidation = validation.validatePassword(newPassword); 
+            if (!passwordValidation.isValid) {
+                return res.render('change-password', {
+                    title: 'Change Password - DLSU Airlines',
+                    error: passwordValidation.error,
+                    username: username
+                });
+            }
 
             if (newPassword !== confirmPassword) {
                 console.log(`❌ Password mismatch for user: ${username}`);
@@ -237,7 +289,62 @@ const authController = {
         try {
             const { originalUsername, username, fullName, birthday, email } = req.body;
 
-            // console.log('🔄 Profile update attempt for:', originalUsername, '->', username);
+            //SERVER-SIDE VALIDATION
+            const nameValidation = validation.validateFullName(fullName);
+            if (!nameValidation.isValid) {
+                return res.render('edit-profile', {
+                    title: 'Edit Profile - DLSU Airlines',
+                    error: nameValidation.error,
+                    profile: { 
+                        username: originalUsername, 
+                        fullName, 
+                        birthday, 
+                        email 
+                    }
+                });
+            }
+
+            const usernameValidation = validation.validateUsername(username);
+            if (!usernameValidation.isValid) {
+                return res.render('edit-profile', {
+                    title: 'Edit Profile - DLSU Airlines',
+                    error: usernameValidation.error,
+                    profile: { 
+                        username: originalUsername, 
+                        fullName, 
+                        birthday, 
+                        email 
+                    }
+                });
+            }
+
+            const birthdayValidation = validation.validateBirthday(birthday);
+            if (!birthdayValidation.isValid) {
+                return res.render('edit-profile', {
+                    title: 'Edit Profile - DLSU Airlines',
+                    error: birthdayValidation.error,
+                    profile: { 
+                        username: originalUsername, 
+                        fullName, 
+                        birthday, 
+                        email 
+                    }
+                });
+            }
+
+            const emailValidation = validation.validateEmail(email);
+            if (!emailValidation.isValid) {
+                return res.render('edit-profile', {
+                    title: 'Edit Profile - DLSU Airlines',
+                    error: emailValidation.error,
+                    profile: { 
+                        username: originalUsername, 
+                        fullName, 
+                        birthday, 
+                        email 
+                    }
+                });
+            }
 
             if (!fullName || !birthday || !email || !username) {
                 return res.render('edit-profile', {
@@ -256,7 +363,7 @@ const authController = {
             if (originalUsername !== username) {
                 const existingUsername = await Profile.findOne({ 
                     username: username,
-                    username: { $ne: originalUsername } // Exclude current user
+                    username: { $ne: originalUsername }
                 });
 
                 if (existingUsername) {
@@ -277,10 +384,9 @@ const authController = {
             const updateResult = await Profile.updateOne(
                 { username: originalUsername },
                 { 
-                    username: username,
-                    fullName: fullName,
+                    username: usernameValidation.sanitized,
+                    fullName: nameValidation.sanitized,
                     birthday: new Date(birthday)
-                    // Email is NOT updated - it remains the same
                 }
             );
 
@@ -302,19 +408,16 @@ const authController = {
                 try {
                     await Booking.updateMany(
                         { username: originalUsername },
-                        { username: username }
+                        { username: usernameValidation.sanitized }
                     );
                     console.log('✅ Successfully updated username in bookings');
                 } catch (bookingError) {
                     console.error('⚠️ Could not update bookings (might not exist):', bookingError);
-                    // Continue even if booking update fails - bookings might not exist for this user
                 }
             }
 
-            // console.log('✅ Profile updated successfully:', originalUsername, '->', username);
-
             // Redirect back to admin with success message and NEW username
-            res.redirect(`/admin?user=${encodeURIComponent(username)}&message=Profile updated successfully`);
+            res.redirect(`/admin?user=${encodeURIComponent(usernameValidation.sanitized)}&message=Profile updated successfully`);
 
         } catch (error) {
             console.error('Profile update error:', error);

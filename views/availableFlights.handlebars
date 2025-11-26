@@ -28,7 +28,7 @@
         </div>
         <p class="card-text flight-price">${{this.price}}</p>
         <div class="text-center mb-3">
-          <a href="/form?price={{this.price}}&origin={{this.origin}}&destination={{this.destination}}&airline={{this.airline}}&flightDeparture={{this.departure_date}}&flightArrival={{this.arrival_date}}{{#if ../profile.username}}&user={{../profile.username}}{{/if}}" class="btn btn-success book-now" 
+            <a href="/form?price={{this.price}}&origin={{this.origin}}&destination={{this.destination}}&airline={{this.airline}}&flightDeparture={{this.departure_date}}&flightArrival={{this.arrival_date}}&flightId={{this._id}}{{#if ../profile.username}}&user={{../profile.username}}{{/if}}" class="btn btn-success book-now" 
                   data-flight-id="{{this._id}}"
                   data-origin="{{this.origin}}"
                   data-destination="{{this.destination}}"

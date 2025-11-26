@@ -57,41 +57,74 @@
         
         console.log('📋 Form data:', { origin, destination, departure, returnDate, passengers });
         
-        if(origin === "" || destination === "" || departure === ""){
-          console.log('❌ Missing required fields');
-          $("#result").text("Please fill in all required fields.");
-        } else {
-          try {
-            const searchParams = new URLSearchParams({
-              origin: origin,
-              destination: destination,
-              departure: departure,
-              return: returnDate,
-              passengers: passengers
-            });
+        // ✅ CLIENT-SIDE VALIDATION
+        const validationErrors = [];
 
-            const username = $('.logo-container').data('username');
-            console.log('👤 Username from data attribute:', username);
-            
-            if (username) {
-              searchParams.set('user', username);
-            }
+        // Validate origin airport code
+        const originValidation = ClientValidation.validateAirportCode(origin);
+        if (!originValidation.isValid) validationErrors.push('Origin: ' + originValidation.error);
 
-            const redirectUrl = `/flights/avail?${searchParams.toString()}`;
-            console.log('🔗 Redirecting to:', redirectUrl);
-            
-            if (redirectUrl.length > 2000) {
-              console.error('❌ URL too long');
-              $("#result").text("Search parameters too long");
-              return;
-            }
-            
-            console.log('✅ Navigating to:', redirectUrl);
-            window.location.href = redirectUrl;
-          } catch (error) {
-            console.error('❌ Error:', error);
-            $("#result").text("Error processing search");
+        // Validate destination airport code
+        const destinationValidation = ClientValidation.validateAirportCode(destination);
+        if (!destinationValidation.isValid) validationErrors.push('Destination: ' + destinationValidation.error);
+
+        // Check they're different
+        if (originValidation.isValid && destinationValidation.isValid &&
+            originValidation.sanitized === destinationValidation.sanitized) {
+          validationErrors.push('Origin and destination must be different');
+        }
+
+        // Validate departure date
+        const departureValidation = ClientValidation.validateDate(departure);
+        if (!departureValidation.isValid) validationErrors.push('Departure: ' + departureValidation.error);
+
+        // Validate return date (if provided)
+        if (returnDate) {
+          const returnValidation = ClientValidation.validateDate(returnDate);
+          if (!returnValidation.isValid) validationErrors.push('Return: ' + returnValidation.error);
+        }
+
+        // Validate passengers
+        if (!passengers || isNaN(passengers) || passengers < 1 || passengers > 9) {
+          validationErrors.push('Number of passengers must be between 1 and 9');
+        }
+
+        if (validationErrors.length > 0) {
+          console.log('❌ Validation errors:', validationErrors);
+          $("#result").text("Please fix: " + validationErrors.join(", "));
+          return;
+        }
+        
+        try {
+          const searchParams = new URLSearchParams({
+            origin: originValidation.sanitized,
+            destination: destinationValidation.sanitized,
+            departure: departure,
+            return: returnDate,
+            passengers: passengers
+          });
+
+          const username = $('.logo-container').data('username');
+          console.log('👤 Username from data attribute:', username);
+          
+          if (username) {
+            searchParams.set('user', username);
           }
+
+          const redirectUrl = `/flights/avail?${searchParams.toString()}`;
+          console.log('🔗 Redirecting to:', redirectUrl);
+          
+          if (redirectUrl.length > 2000) {
+            console.error('❌ URL too long');
+            $("#result").text("Search parameters too long");
+            return;
+          }
+          
+          console.log('✅ Navigating to:', redirectUrl);
+          window.location.href = redirectUrl;
+        } catch (error) {
+          console.error('❌ Error:', error);
+          $("#result").text("Error processing search");
         }
       });
     });

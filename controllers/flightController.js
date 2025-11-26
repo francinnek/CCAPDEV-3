@@ -1,5 +1,6 @@
 const Available_Flight = require('../models/Available_Flight');
 const Profile = require('../models/Profile');
+const validation = require('../utils/validation');
 
 /* ✅ Helper to get full user profile
 // async function getUserProfile(req) {
@@ -105,10 +106,8 @@ const flightController = {
         return res.redirect('/loginOrRegister/login?error=Please login first');
       };
 
-      // const username = req.body.username;
       const username = req.session.user.username;
-      const profile = req.session.user;// await getUserProfile(username);
-      // const isAdmin = profile?.isAdmin || false;
+      const profile = req.session.user;
       const isAdmin = req.session.user.isAdmin || false;
 
       if (!isAdmin || !profile) {
@@ -132,40 +131,95 @@ const flightController = {
         price
       } = req.body;
 
-      // Basic validation
-      if (!flightNumber || !origin || !destination || !departure_date || !arrival_date || !aircraftType || !seatCapacity) {
+      //SERVER-SIDE VALIDATION uses the validation.js 
+      const errors = [];
+
+      // Validate flight number
+      const flightNumValidation = validation.validateFlightNumber(flightNumber);
+      if (!flightNumValidation.isValid) errors.push(flightNumValidation.error);
+
+      // Validate airport codes
+      const originValidation = validation.validateAirportCode(origin);
+      if (!originValidation.isValid) errors.push('Origin: ' + originValidation.error);
+
+      const destinationValidation = validation.validateAirportCode(destination);
+      if (!destinationValidation.isValid) errors.push('Destination: ' + destinationValidation.error);
+
+      // Check that origin and destination are different
+      if (originValidation.isValid && destinationValidation.isValid &&
+          originValidation.sanitized === destinationValidation.sanitized) {
+        errors.push('Origin and destination cannot be the same');
+      }
+
+      // Validate departure date and time
+      const departureValidation = validation.validateDateTime(departure_date, departure_time);
+      if (!departureValidation.isValid) errors.push('Departure: ' + departureValidation.error);
+
+      // Validate arrival date and time
+      const arrivalValidation = validation.validateDateTime(arrival_date, arrival_time);
+      if (!arrivalValidation.isValid) errors.push('Arrival: ' + arrivalValidation.error);
+
+      // Validate seat capacity
+      const capacityValidation = validation.validateSeatCapacity(seatCapacity);
+      if (!capacityValidation.isValid) errors.push(capacityValidation.error);
+
+      // Validate price
+      const priceValidation = validation.validatePrice(price);
+      if (!priceValidation.isValid) errors.push(priceValidation.error);
+
+      // Validate aircraft type
+      const aircraftValidation = validation.validateTextField(aircraftType, 'Aircraft type', 2, 50);
+      if (!aircraftValidation.isValid) errors.push(aircraftValidation.error);
+
+      // Validate airline
+      let airlineValidation = { isValid: true, sanitized: airline };
+      if (airline) {
+        airlineValidation = validation.validateTextField(airline, 'Airline', 2, 50);
+        if (!airlineValidation.isValid) errors.push(airlineValidation.error);
+      }
+
+      // Check arrival is after departure
+      if (departureValidation.isValid && arrivalValidation.isValid) {
+        const depDateTime = new Date(`${departure_date}T${departure_time}`);
+        const arrDateTime = new Date(`${arrival_date}T${arrival_time}`);
+        if (arrDateTime <= depDateTime) {
+          errors.push('Arrival time must be after departure time');
+        }
+      }
+
+      if (errors.length > 0) {
         return res.render('create-flight', {
           title: 'Create Flight - DLSU Airlines',
           username: username,
           isAdmin: isAdmin,
           profile: profile,
-          error: 'Please fill in all required fields',
+          error: errors.join(', '),
           formData: req.body
         });
       }
 
       const newFlight = new Available_Flight({
-        flightNumber,
-        origin,
-        destination,
+        flightNumber: flightNumValidation.sanitized,
+        origin: originValidation.sanitized,
+        destination: destinationValidation.sanitized,
         schedule: {
           departure_date: new Date(departure_date),
           departure_time,
           arrival_date: new Date(arrival_date),
           arrival_time
         },
-        aircraftType,
-        seatCapacity: parseInt(seatCapacity),
-        airline,
+        aircraftType: aircraftValidation.sanitized,
+        seatCapacity: capacityValidation.sanitized,
+        airline: airlineValidation.sanitized || 'Not Specified',
         departure_date: new Date(departure_date),
         departure_time,
         arrival_date: new Date(arrival_date),
         arrival_time,
-        price: parseFloat(price)
+        price: parseFloat(priceValidation.sanitized)
       });
 
-  await newFlight.save();
-  console.log(`✅ Flight created successfully: ${flightNumber}`);
+      await newFlight.save();
+      console.log(`✅ Flight created successfully: ${flightNumValidation.sanitized}`);
 
       res.redirect(`/admin/flights?user=${encodeURIComponent(username)}&message=Flight created successfully`);
     } catch (error) {
@@ -174,7 +228,7 @@ const flightController = {
       if (error.code === 11000) {
         return res.render('create-flight', {
           title: 'Create Flight - DLSU Airlines',
-          username: req.body.username,
+          username: req.session.user.username,
           error: 'Flight number already exists',
           formData: req.body
         });
@@ -182,7 +236,7 @@ const flightController = {
 
       res.render('create-flight', {
         title: 'Create Flight - DLSU Airlines',
-        username: username,
+        username: req.session.user.username,
         error: '❌ Error creating flight: ' + error.message,
         formData: req.body
       });
@@ -242,17 +296,24 @@ const flightController = {
         return res.redirect('/loginOrRegister/login?error=Please login first');
       };
 
-      // const username = req.body.username;
       const username = req.session.user.username;
       const flightId = req.params.id;
-      const profile = req.session.user; // await getUserProfile(username);
-      // const isAdmin = profile?.isAdmin || false;
+      const profile = req.session.user;
       const isAdmin = req.session.user.isAdmin || false;
 
       if (!isAdmin || !profile) {
         return res.status(403).json({
           success: false,
           message: 'Only administrators can update flights'
+        });
+      }
+
+      // Validate MongoDB ID
+      const idValidation = validation.validateMongoId(flightId);
+      if (!idValidation.isValid) {
+        return res.status(400).render('error', {
+          title: 'Error',
+          message: 'Invalid flight ID'
         });
       }
 
@@ -270,26 +331,84 @@ const flightController = {
         price
       } = req.body;
 
+      // SERVER-SIDE VALIDATION uses the validation.js
+      const errors = [];
+
+      const flightNumValidation = validation.validateFlightNumber(flightNumber);
+      if (!flightNumValidation.isValid) errors.push(flightNumValidation.error);
+
+      const originValidation = validation.validateAirportCode(origin);
+      if (!originValidation.isValid) errors.push('Origin: ' + originValidation.error);
+
+      const destinationValidation = validation.validateAirportCode(destination);
+      if (!destinationValidation.isValid) errors.push('Destination: ' + destinationValidation.error);
+
+      if (originValidation.isValid && destinationValidation.isValid &&
+          originValidation.sanitized === destinationValidation.sanitized) {
+        errors.push('Origin and destination cannot be the same');
+      }
+
+      const departureValidation = validation.validateDateTime(departure_date, departure_time);
+      if (!departureValidation.isValid) errors.push('Departure: ' + departureValidation.error);
+
+      const arrivalValidation = validation.validateDateTime(arrival_date, arrival_time);
+      if (!arrivalValidation.isValid) errors.push('Arrival: ' + arrivalValidation.error);
+
+      const capacityValidation = validation.validateSeatCapacity(seatCapacity);
+      if (!capacityValidation.isValid) errors.push(capacityValidation.error);
+
+      const priceValidation = validation.validatePrice(price);
+      if (!priceValidation.isValid) errors.push(priceValidation.error);
+
+      const aircraftValidation = validation.validateTextField(aircraftType, 'Aircraft type', 2, 50);
+      if (!aircraftValidation.isValid) errors.push(aircraftValidation.error);
+
+      let airlineValidation = { isValid: true, sanitized: airline };
+      if (airline) {
+        airlineValidation = validation.validateTextField(airline, 'Airline', 2, 50);
+        if (!airlineValidation.isValid) errors.push(airlineValidation.error);
+      }
+
+      if (departureValidation.isValid && arrivalValidation.isValid) {
+        const depDateTime = new Date(`${departure_date}T${departure_time}`);
+        const arrDateTime = new Date(`${arrival_date}T${arrival_time}`);
+        if (arrDateTime <= depDateTime) {
+          errors.push('Arrival time must be after departure time');
+        }
+      }
+
+      if (errors.length > 0) {
+        const flight = await Available_Flight.findById(flightId).lean();
+        return res.render('edit-flight', {
+          title: 'Edit Flight - DLSU Airlines',
+          username: username,
+          isAdmin: isAdmin,
+          profile: profile,
+          flight: flight,
+          error: errors.join(', ')
+        });
+      }
+
       const updatedFlight = await Available_Flight.findByIdAndUpdate(
         flightId,
         {
-          flightNumber,
-          origin,
-          destination,
+          flightNumber: flightNumValidation.sanitized,
+          origin: originValidation.sanitized,
+          destination: destinationValidation.sanitized,
           schedule: {
             departure_date: new Date(departure_date),
             departure_time,
             arrival_date: new Date(arrival_date),
             arrival_time
           },
-          aircraftType,
-          seatCapacity: parseInt(seatCapacity),
-          airline,
+          aircraftType: aircraftValidation.sanitized,
+          seatCapacity: capacityValidation.sanitized,
+          airline: airlineValidation.sanitized || 'Not Specified',
           departure_date: new Date(departure_date),
           departure_time,
           arrival_date: new Date(arrival_date),
           arrival_time,
-          price: parseFloat(price)
+          price: parseFloat(priceValidation.sanitized)
         },
         { new: true, runValidators: true }
       );
@@ -301,14 +420,15 @@ const flightController = {
         });
       }
 
-    console.log(`✅ Flight updated successfully: ${flightNumber}`);
+      console.log(`✅ Flight updated successfully: ${flightNumValidation.sanitized}`);
       res.redirect(`/admin/flights?user=${encodeURIComponent(username)}&message=Flight updated successfully`);
     } catch (error) {
       console.error('❌ Error updating flight:', error);
+      const flight = await Available_Flight.findById(req.params.id).lean();
       res.render('edit-flight', {
         title: 'Edit Flight - DLSU Airlines',
-        username: username,
-        flight: req.body,
+        username: req.session.user.username,
+        flight: flight,
         error: 'Error updating flight: ' + error.message
       });
     }
@@ -321,10 +441,7 @@ const flightController = {
         return res.redirect('/loginOrRegister/login?error=Please login first');
       };
 
-      // const username = req.body.username || req.query.user;
-      // const username = req.session.user.username;
-      const profile = req.session.user; // await getUserProfile(username);
-      // const isAdmin = profile?.isAdmin || false;
+      const profile = req.session.user;
       const isAdmin = req.session.user.isAdmin || false;
 
       if (!isAdmin || !profile) {
@@ -335,6 +452,16 @@ const flightController = {
       }
 
       const flightId = req.params.id;
+
+      // Validate MongoDB ID
+      const idValidation = validation.validateMongoId(flightId);
+      if (!idValidation.isValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid flight ID'
+        });
+      }
+
       const deletedFlight = await Available_Flight.findByIdAndDelete(flightId);
 
       if (!deletedFlight) {
@@ -344,7 +471,7 @@ const flightController = {
         });
       }
 
-    console.log(`✅ Flight deleted successfully: ${deletedFlight.flightNumber}`);
+      console.log(`✅ Flight deleted successfully: ${deletedFlight.flightNumber}`);
       res.json({
         success: true,
         message: 'Flight deleted successfully'

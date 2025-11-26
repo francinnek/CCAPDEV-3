@@ -78,12 +78,18 @@
           price: priceAttr
         });
 
+        // Collects the unique identifier for the specific flight selected.
+        const flightIdAttr = button.attr('data-flight-id') || card.data('flight-id') || '';
+        // Passes the unique flight ID via parameter to the reservation form
+        // The reservation form will then use this ID to identify the seat
+        // and perform the server-side seat availability check when submitting
+        if (flightIdAttr) params.set('flightId', flightIdAttr);
+
         // Get username from page data attribute
         const username = $('.flights-container').data('username');
         if (username) {
           params.set('user', username);
         }
-
         if (searchDate) {
           params.set('searchDeparture', searchDate);
         }

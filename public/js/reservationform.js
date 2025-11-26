@@ -9,11 +9,12 @@ $(document).ready(function() {
     
     let flightPrice, origin, destination, airline, departure, arrival;
     
+    //Use provided data from handlebars
     if (isModification && window.flightData) {
-        // ✅ Use data injected by Handlebars
+        //asign values from handlebars to the variables        
         const f = window.flightData;
-        flightPrice = parseInt(f.price) || 40;
-        origin = f.origin || 'Unknown Origin';
+        flightPrice = parseInt(f.price) || 40; 
+        origin = f.origin || 'Unknown Origin'; 
         destination = f.destination || 'Unknown Destination';
         airline = f.airline || 'Unknown Airline';
         departure = f.departure || f.departure_time || 'N/A';
@@ -22,18 +23,19 @@ $(document).ready(function() {
         selectedSeat = window.currentSelectedSeat || '';
         mealOption = mealDropdownToggle.text();
 
-        // Pre-select the current seat
-        setTimeout(() => {
+        // Pre-select the current seat 
+        setTimeout(() => { // Delay first to ensure seat map renders
             $('.grid-square.hover-effect').each(function() {
                 const row = $(this).closest('.row').find('.seatAisle').text().trim();
                 const col = $(this).parent().children().index(this);
                 const letters = ['A', 'B', 'C', '', 'D', 'E', 'F'];
-                const seat = letters[col] + row;
+                // Construct seat as row number followed by letter (e.g., 1A)
+                const seat = row + letters[col];
                 if (seat === selectedSeat) $(this).addClass('selected');
             });
         }, 100);
     } else {
-        // New booking via URL params
+        // new booking via parameters set by search page
         flightPrice = parseInt(urlParams.get('price')) || 40;
         origin = urlParams.get('origin') || 'Unknown Origin';
         destination = urlParams.get('destination') || 'Unknown Destination';
@@ -62,7 +64,8 @@ $(document).ready(function() {
         const row = $(this).closest('.row').find('.seatAisle').text().trim();
         const col = $(this).parent().children().index(this);
         const letters = ['A', 'B', 'C', '', 'D', 'E', 'F'];
-        selectedSeat = letters[col] + row;
+        // Construct selected seat as row number + letter to match validators (e.g., 1A)
+        selectedSeat = row + letters[col];
         console.log('Selected seat:', selectedSeat);
     });
 
@@ -78,23 +81,53 @@ $(document).ready(function() {
         const email = $('#email').val();
         const passportId = $('#passportId').val();
         const extraBaggage = parseInt($('#extraBaggage').val()) || 0;
-        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if ((!isModification && (!name || !email || !passportId)) || !selectedSeat) {
-            alert('Please fill in all required fields and select a seat.');
-            return;
+        // client side validation
+        //validates the inputs by sending it to clientValidation.js
+        const validationErrors = []; // initialize error array
+
+        // Validate name for new bookings
+        if (!isModification) { 
+            const nameValidation = ClientValidation.validateFullName(name); 
+            if (!nameValidation.isValid) validationErrors.push(nameValidation.error); 
+
+            // Validate email
+            const emailValidation = ClientValidation.validateEmail(email);
+            if (!emailValidation.isValid) validationErrors.push(emailValidation.error);
+
+            // Validate passport ID
+            const passportValidation = ClientValidation.validatePassportId(passportId);
+            if (!passportValidation.isValid) validationErrors.push(passportValidation.error);
         }
 
-        if (!isModification && !emailRegex.test(email)) {
-            alert('Please enter a valid email address.');
-            return;
+        // Validate seat selection
+        if (!selectedSeat) {
+            validationErrors.push('Please select a seat');
+        } else {
+            const seatValidation = ClientValidation.validateSeat(selectedSeat);
+            if (!seatValidation.isValid) validationErrors.push(seatValidation.error);
         }
 
-        const baggagePrice = extraBaggage * 60;
+        // Validate meal option
+        const mealValidation = ClientValidation.validateMealOption(mealOption);
+        if (!mealValidation.isValid) validationErrors.push(mealValidation.error);
+
+        // Validate extra baggage
+        const baggageValidation = ClientValidation.validateExtraBaggage(extraBaggage);
+        if (!baggageValidation.isValid) validationErrors.push(baggageValidation.error);
+
+        // Show validation errors
+        if (validationErrors.length > 0) {
+            alert('Please fix the following errors:\n\n' + validationErrors.join('\n'));
+            return;
+        }
+        // Calculate prices
+        const baggagePrice = baggageValidation.sanitized * 60;
         const totalPrice = flightPrice + baggagePrice;
+        // Show summary modal
         const summaryText = `
             <strong>Passenger Information:</strong><br>
-            Name: ${name}<br>
+            Name: ${ClientValidation.validateFullName(name).sanitized || name}<br>
             Email: ${email}<br>
             Passport ID: ${passportId}<br>
             <br>
@@ -105,7 +138,7 @@ $(document).ready(function() {
             Arrival: ${arrival}<br>
             Selected Seat: ${selectedSeat}<br>
             Meal Option: ${mealOption}<br>
-            Extra Baggage: ${extraBaggage} ($${baggagePrice})<br>
+            Extra Baggage: ${baggageValidation.sanitized} ($${baggagePrice})<br>
             <br>
             <strong>Price Breakdown:</strong><br>
             Flight Price: $${flightPrice}<br>
@@ -124,20 +157,49 @@ $(document).ready(function() {
         const passportId = $('#passportId').val();
         const extraBaggage = parseInt($('#extraBaggage').val()) || 0;
         
-        const baggagePrice = extraBaggage * 60;
+        // final client-side validation before submission (all same validations)
+        const validationErrors = [];
+        
+        if (!isModification) {
+            const nameValidation = ClientValidation.validateFullName(name);
+            if (!nameValidation.isValid) validationErrors.push(nameValidation.error);
+
+            const emailValidation = ClientValidation.validateEmail(email);
+            if (!emailValidation.isValid) validationErrors.push(emailValidation.error);
+
+            const passportValidation = ClientValidation.validatePassportId(passportId);
+            if (!passportValidation.isValid) validationErrors.push(passportValidation.error);
+        }
+        
+        const seatValidation = ClientValidation.validateSeat(selectedSeat);
+        if (!seatValidation.isValid) validationErrors.push(seatValidation.error);
+
+        const mealValidation = ClientValidation.validateMealOption(mealOption);
+        if (!mealValidation.isValid) validationErrors.push(mealValidation.error);
+
+        const baggageValidation = ClientValidation.validateExtraBaggage(extraBaggage);
+        if (!baggageValidation.isValid) validationErrors.push(baggageValidation.error);
+
+        if (validationErrors.length > 0) {
+            alert('Validation errors:\n\n' + validationErrors.join('\n'));
+            return;
+        }
+        
+        const baggagePrice = baggageValidation.sanitized * 60;
         const totalPrice = flightPrice + baggagePrice;
 
-        // Get username from URL params
+        // Get username from global parameters
         const username = urlParams.get('user') || '';
-
+        // final booking data object
         const bookingData = {
             username: username,
-            name,
-            email,
-            passportId,
-            selectedSeat,
-            mealOption,
-            extraBaggage,
+            name: !isModification ? ClientValidation.validateFullName(name).sanitized : name,
+            email: !isModification ? ClientValidation.validateEmail(email).sanitized : email,
+            passportId: !isModification ? ClientValidation.validatePassportId(passportId).sanitized : passportId,
+            selectedSeat: ClientValidation.validateSeat(selectedSeat).sanitized,
+            mealOption: ClientValidation.validateMealOption(mealOption).sanitized,
+            flightId: window.flightData && window.flightData._id,
+            extraBaggage: baggageValidation.sanitized,
             origin,
             destination,
             airline,
@@ -148,7 +210,7 @@ $(document).ready(function() {
             totalPrice,
             status: 'confirmed'
         };
-
+        
         const url = isModification ? `/bookings/${bookingId}` : '/bookings';
         const method = isModification ? 'PUT' : 'POST';
         

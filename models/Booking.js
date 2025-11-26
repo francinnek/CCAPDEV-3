@@ -19,6 +19,10 @@ const bookingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    flightId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Available_Flight'
+    },
     selectedSeat: {
         type: String,
         required: true

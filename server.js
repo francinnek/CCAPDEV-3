@@ -7,15 +7,17 @@ const exphbs = require('express-handlebars');
 
 const connectDb = require('./config/database');
 
-const Available_Flight = require('./controllers/available_flightsController');
+const availableFlightsController = require('./controllers/available_flightsController');
+const Available_Flight = require('./models/Available_Flight');
 const loginRegController = require('./routes/loginRoutes');
 
 const flightManagementRoutes = require('./routes/flightRoutes');
 const usersRoutes = require('./routes/usersRoutes'); 
-const Book = require('./routes/bookingRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 const Booking = require('./models/Booking');
 const Profile = require('./models/Profile');
+const validation = require('./utils/validation');
 
 const app = express();
 const PORT = 3000;
@@ -134,7 +136,7 @@ app.use((req, res, next) => {
 // }; */
 
 /* ===================== ROUTES ====================== */
-app.use('/flights', Available_Flight);
+app.use('/flights', availableFlightsController);
 app.use('/admin/flights', userRoleAuth('admin'), flightManagementRoutes);
 app.use('/admin/users', userRoleAuth('admin'), usersRoutes);
 app.use('/loginOrRegister', loginRegController);
@@ -189,6 +191,10 @@ app.get('/form', userRoleAuth('user'), async (req, res) => {
             departure: req.query.flightDeparture,
             arrival: req.query.flightArrival
         };
+        // include flightId if provided so the client can send it back for atomic seat reservation
+        if (req.query.flightId) {
+            flightData._id = req.query.flightId;
+        }
 
         res.render('reservationForm', {
             title: 'Book Flight - DLSU Airlines',
@@ -246,28 +252,79 @@ app.get('/admin', async (req, res) => {
 
 app.put('/bookings/:id', userRoleAuth('user'), async (req, res) => {
     try {
-    // console.log('📝 Modifying booking:', req.params.id);
-        
-        const updatedBooking = await Booking.findByIdAndUpdate(
-            req.params.id,
-            {
-                selectedSeat: req.body.selectedSeat,
-                mealOption: req.body.mealOption,
-                extraBaggage: req.body.extraBaggage,
-                baggagePrice: (req.body.extraBaggage || 0) * 60,
-                totalPrice: (req.body.flightPrice || 0) + ((req.body.extraBaggage || 0) * 60)
-            },
-            { new: true, runValidators: true }
-        );
+        // Modify booking with seat-reservation safety. If changing seat, ensure new seat is reserved atomically
+        const bookingId = req.params.id;
+        const newSeat = req.body.selectedSeat;
+        const flightPrice = req.body.flightPrice || 0;
+        const extraBaggage = req.body.extraBaggage || 0;
 
-        if (!updatedBooking) {
+        const existingBooking = await Booking.findById(bookingId);
+        if (!existingBooking) {
             return res.status(404).json({ error: 'Booking not found' });
         }
 
-        res.json({ 
-            success: true, 
-            message: 'Booking updated successfully'
-        });
+        // Only the booking owner may modify their booking
+        if (req.session.user?.username && existingBooking.username !== req.session.user.username) {
+            return res.status(403).json({ error: 'You do not have permission to modify this booking' });
+        }
+
+        // If seat is changing and this booking references a flight, attempt to reserve the new seat first
+        if (newSeat && existingBooking.selectedSeat !== newSeat) {
+            if (!existingBooking.flightId) {
+                return res.status(400).json({ error: 'Cannot change seat: booking has no associated flightId' });
+            }
+
+            // Validate new seat
+            const seatValidation = validation.validateSeat(String(newSeat));
+            if (!seatValidation.isValid) {
+                return res.status(400).json({ error: seatValidation.error });
+            }
+
+                // Remember old seat to release later
+                const oldSeat = existingBooking.selectedSeat;
+
+                // Try to reserve new seat atomically
+                const reserved = await Available_Flight.findOneAndUpdate(
+                    { _id: existingBooking.flightId, bookedSeats: { $ne: seatValidation.sanitized } },
+                    { $push: { bookedSeats: seatValidation.sanitized } },
+                    { new: true }
+                );
+
+            if (!reserved) {
+                return res.status(409).json({ error: 'Selected seat is already booked. Please choose a different seat.' });
+            }
+
+            // Update booking to new seat and other fields
+            existingBooking.selectedSeat = seatValidation.sanitized;
+            existingBooking.mealOption = req.body.mealOption;
+            existingBooking.extraBaggage = extraBaggage;
+            existingBooking.baggagePrice = extraBaggage * 60;
+            existingBooking.totalPrice = flightPrice + (extraBaggage * 60);
+            await existingBooking.save();
+
+            // Release old seat (best-effort; if this fails it's acceptable as system still prevents double-booking)
+            try {
+                if (oldSeat) {
+                    await Available_Flight.updateOne(
+                        { _id: existingBooking.flightId },
+                        { $pull: { bookedSeats: oldSeat } }
+                    );
+                }
+            } catch (e) {
+                console.warn('Warning: failed to release old seat after updating booking', e.message);
+            }
+
+            return res.json({ success: true, message: 'Booking updated successfully' });
+        }
+
+        // No seat change - simply update other fields
+        existingBooking.mealOption = req.body.mealOption || existingBooking.mealOption;
+        existingBooking.extraBaggage = extraBaggage;
+        existingBooking.baggagePrice = extraBaggage * 60;
+        existingBooking.totalPrice = flightPrice + (extraBaggage * 60);
+        await existingBooking.save();
+
+        return res.json({ success: true, message: 'Booking updated successfully' });
     } catch (err) {
         console.error('Error updating booking:', err);
         res.status(400).json({ error: err.message });
@@ -300,6 +357,7 @@ app.get('/bookings/:id/edit', userRoleAuth('user'), async (req, res) => {
             title: 'Modify Reservation - DLSU Airlines',
             active: { book: true },
             flight: {
+                _id: booking.flightId,
                 origin: booking.origin,
                 destination: booking.destination,
                 airline: booking.airline,
@@ -389,12 +447,54 @@ app.get('/bookings', userRoleAuth('user'), async (req, res) => {
 
 app.post('/bookings', userRoleAuth('user'), async (req, res) => {
     try {
+        // Expecting flightId and selectedSeat in request body for atomic seat reservation
+        const { flightId, selectedSeat } = req.body;
+
+        if (!flightId) {
+            return res.status(400).json({ error: 'Missing flightId' });
+        }
+
+        // Validate flightId format
+        const flightIdValidation = validation.validateMongoId(String(flightId));
+        if (!flightIdValidation.isValid) {
+            return res.status(400).json({ error: 'Invalid flightId' });
+        }
+
+        // Validate seat format
+        const seatValidation = validation.validateSeat(String(selectedSeat || ''));
+        if (!seatValidation.isValid) {
+            return res.status(400).json({ error: seatValidation.error });
+        }
+
+        // Attempt to reserve the seat atomically 
+        const flightUpdate = await Available_Flight.findOneAndUpdate(
+            { _id: flightId, bookedSeats: { $ne: seatValidation.sanitized } }, 
+            //will only push if seat is not already present
+            { $push: { bookedSeats: seatValidation.sanitized } }, 
+            { new: true }
+        );
+
+        if (!flightUpdate) {
+            // Either flight not found or seat already taken
+            // Check if flight exists to give a clearer error
+            const flightExists = await Available_Flight.exists({ _id: flightId });
+            if (!flightExists) {
+                return res.status(404).json({ error: 'Flight not found' });
+            }
+
+            return res.status(409).json({ error: 'Selected seat is already booked. Please choose a different seat.' });
+        }
+
+        // Seat reserved successfully on flight document; now create booking
+        // Ensure booking.username comes from session (prevent spoofing)
+        req.body.username = req.session.user?.username || req.body.username;
+        // Normalize the selectedSeat to sanitized value before saving
+        req.body.selectedSeat = seatValidation.sanitized;
         const booking = new Booking(req.body);
         await booking.save();
         res.json({ success: true });
     } catch (err) {
-        // console.error('❌ Error creating booking:', err.message);
-        console.error(`❌ SECURITY: Booking creation failed for user: ${req.session.user.username}`, err);
+        console.error(`❌ SECURITY: Booking creation failed for user: ${req.session.user?.username}`, err);
         res.status(400).json({ error: err.message });
     }
 });
@@ -453,7 +553,27 @@ app.get('/reservations/:id', userRoleAuth('user'), async (req, res) => {
 
 app.post('/reservations/:id/cancel', async (req, res) => {
     try {
-        await Booking.findByIdAndUpdate(req.params.id, { status: 'cancelled' });
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            return res.status(404).send('Reservation not found');
+        }
+
+        // Mark booking cancelled
+        booking.status = 'cancelled';
+        await booking.save();
+
+        // Release booked seat from flight (best-effort)
+        try {
+            if (booking.flightId && booking.selectedSeat) {
+                await Available_Flight.updateOne(
+                    { _id: booking.flightId },
+                    { $pull: { bookedSeats: booking.selectedSeat } }
+                );
+            }
+        } catch (e) {
+            console.warn('Warning: failed to release seat on cancel', e.message);
+        }
+
         res.redirect('/reservations');
     } catch (err) {
         res.status(500).send('Error cancelling reservation');

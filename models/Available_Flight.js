@@ -65,6 +65,12 @@ const availableFlightSchema = new mongoose.Schema({
         type: Number,
         required: true
     }
+    ,
+    // Tracks booked seats to prevent double-booking
+    bookedSeats: {
+        type: [String],
+        default: []
+    }
 });
 
 module.exports = mongoose.model('Available_Flight', availableFlightSchema);
