@@ -1,0 +1,152 @@
+<div class="container reservations-container">
+  <h1>Flight Management</h1>
+
+  {{#if message}}
+    <div class="alert alert-success">{{message}}</div>
+  {{/if}}
+
+  {{#if isAdmin}}
+  <div class="admin-actions mb-3 d-flex gap-2 flex-wrap">
+    <a href="/admin/flights/create?user={{username}}" class="btn btn-success btn-sm">
+      + Create New Flight
+    </a>
+    <a href="/admin/users?user={{username}}" class="btn btn-success btn-sm">
+      Manage Users
+    </a>
+  </div>
+{{/if}}
+
+
+  <div class="flights-table">
+    {{#if flights.length}}
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Flight Number</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Schedule</th>
+            <th>Aircraft Type</th>
+            <th>Seat Capacity</th>
+            <th>Price</th>
+            {{#if isAdmin}}<th>Actions</th>{{/if}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each flights}}
+          <tr>
+            <td>{{this.flightNumber}}</td>
+            <td>{{this.origin}}</td>
+            <td>{{this.destination}}</td>
+            <td>
+              <div>Depart: {{formatDate this.departure_date}} {{this.departure_time}}</div>
+              <div>Arrive: {{formatDate this.arrival_date}} {{this.arrival_time}}</div>
+            </td>
+            <td>{{this.aircraftType}}</td>
+            <td>{{this.seatCapacity}}</td>
+            <td>${{this.price}}</td>
+
+            {{#if ../isAdmin}}
+            <td>
+              <a href="/admin/flights/{{this._id}}/edit?user={{../username}}" class="btn btn-warning btn-sm me-2">Edit</a>
+              <button class="btn btn-danger btn-sm"
+                      onclick="deleteFlight('{{this._id}}', '{{../username}}')">
+                Delete
+              </button>
+            </td>
+            {{/if}}
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <p class="text-center no-data">No flights available. {{#if isAdmin}}Click "Create New Flight" to add one.{{/if}}</p>
+    {{/if}}
+  </div>
+
+  <div class="back-link mt-4">
+  <a href="/admin?user={{username}}" class="btn back-green-btn">
+    ← Back to Dashboard
+  </a>
+</div>
+
+
+
+<script>
+function deleteFlight(flightId, username) {
+  if (!confirm('Are you sure you want to delete this flight?')) return;
+
+  fetch(`/admin/flights/${flightId}?user=${encodeURIComponent(username)}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert('Error deleting flight: ' + (data.message || 'Unknown error'));
+    }
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('Error deleting flight');
+  });
+}
+</script>
+
+
+<style>
+/* Use your global theme (main.css) colors and spacing */
+/* Keep styles minimal so it matches My Reservations exactly */
+
+/* page container */
+.container { max-width: 1200px; }
+
+/* table look aligns with Bootstrap table + your theme */
+.no-data { color: var(--light-grey); }
+
+/* match My Reservations button spacing & inline layout */
+.reservations-container .table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.reservations-container .table td .btn {
+  margin-right: 6px;
+}
+
+.reservations-container .table td .btn:last-child {
+  margin-right: 0;
+}
+
+/* create button area */
+.admin-actions .btn-success {
+  font-weight: 600;
+}
+
+/* links */
+.back-link a { color: #fbfbfc; text-decoration: none; }
+.back-link a:hover { text-decoration: underline; }
+
+.back-green-btn {
+    background-color: var(--primary-color);  /* same green */
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 6px;
+    display: inline-block;
+    text-decoration: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.back-green-btn:hover {
+    background-color: var(--secondary-color); /* darker green */
+    border-color: var(--secondary-color);
+    color: white;
+    text-decoration: none;
+}
+
+</style>

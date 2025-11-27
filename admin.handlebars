@@ -1,0 +1,31 @@
+<div class="logo-container">
+  <img src="/sprites/dlsu-airlines.png" class="logo-image-admin" alt="DLSU Airlines Logo">
+  
+  {{#if message}}
+    <div class="alert alert-success mt-3">{{message}}</div>
+  {{/if}}
+  
+  <p id="page-text"><br>Welcome to our Home Page! <br> Choose where you want to start</p>
+  
+  <div class="center-nav mt-5">
+    <div class="d-flex justify-content-center flex-wrap gap-3">
+      <a href="/flights/avail?user={{username}}" class="btn btn-primary btn-lg">
+  View Flights
+</a>
+
+<a href="/flights/search?user={{username}}" class="btn btn-primary btn-lg">
+  Search Flight
+</a>
+
+<a href="/checkin?user={{username}}" class="btn btn-primary btn-lg">
+  online check-in
+</a>
+
+      {{#if isAdmin}}
+      <a href="/admin/flights?user={{username}}" class="btn btn-warning btn-lg admin-bold-btn" id="manageFlightsBtn">
+        Manage Flights (Admin)
+      </a>
+      {{/if}}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,85 @@
+<div class="container d-flex flex-column align-items-center mt-5 mb-5 pb-5">
+    <!-- Logo -->
+    <div class="logo-container mb-4">
+        <img src="/sprites/dlsu-airlines.png" class="logo-image" alt="DLSU Airlines Logo">
+    </div>
+
+    <div class="container-re"> <!-- Same class as login/register -->
+        <h2 class="mb-4 text-center">Online Check-in</h2>
+        <p class="text-center text-muted mb-4">
+            Check-in opens 24 hours before departure
+        </p>
+
+        {{#if error}}
+            <div class="alert alert-danger text-center">{{error}}</div>
+        {{/if}}
+
+        {{#if success}}
+            <!-- SUCCESS: SHOW BOARDING PASS -->
+            <div class="text-center">
+                <div class="alert alert-success">
+                    <h4>Check-in Successful!</h4>
+                    <h2 class="display-5 text-success fw-bold">{{boardingPass}}</h2>
+                    <p><strong>Boarding Pass Number</strong></p>
+                </div>
+
+                <div class="card border-success shadow-sm mt-4">
+                    <div class="card-body text-start">
+                        <h5 class="card-title text-success">Boarding Pass</h5>
+                        <hr class="border-success">
+
+                        <p><strong>Passenger:</strong> {{booking.name}}</p>
+                        <p><strong>From → To:</strong> {{booking.origin}} → {{booking.destination}}</p>
+                        <p><strong>Date:</strong> {{booking.flightDeparture}}</p>
+                        <p><strong>Seat:</strong> <span class="badge bg-success fs-6">{{booking.selectedSeat}}</span></p> 
+                        <p><strong>Booking Reference number:</strong> {{booking._id}}</p>
+                    </div>
+                </div>
+
+                <div class="button-container mt-4">
+                    <button onclick="window.print()" class="btn btn-login">Print Boarding Pass</button>
+                    <a href="/admin" class="btn btn-register">Back to Home</a>
+                </div>
+            </div>
+        {{else}}
+            <!-- FORM: NOT YET CHECKED IN -->
+            <form method="POST" action="/checkin" novalidate>
+                <div class="mb-4">
+                    <label for="bookingId" class="form-label">Booking Reference</label>
+                    <input 
+                        type="text" 
+                        class="form-control form-control-lg" 
+                        id="bookingId" 
+                        name="bookingId" 
+                        placeholder="e.g. 6928353e4fd27dcde557f7b6" 
+                        required
+                        style="letter-spacing: 1px; font-family: monospace;">
+                    <div class="form-text">
+                        This is the long ID shown in your booking confirmation
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input 
+                        type="text" 
+                        class="form-control form-control-lg" 
+                        id="lastName" 
+                        name="lastName" 
+                        placeholder="e.g., Santos" 
+                        required>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="btn btn-login w-100">Check In Now</button>
+                </div>
+
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        Need help? Contact <a href="mailto:support@dlsu.airlines.ph">support_center@dlsu.airlines.ph</a>
+                    </small>
+                </div>
+            </form>
+        {{/if}}
+    </div>
+</div>

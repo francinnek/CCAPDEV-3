@@ -1,0 +1,61 @@
+<div class="logo-container">
+    <img src="/sprites/dlsu-airlines.png" class="logo-image" alt="DLSU Airlines Logo">
+</div>
+
+<div class="container d-flex flex-column align-items-center mt-5">
+    {{#if error}}
+        <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+    {{#if success}}
+        <div class="alert alert-success">{{success}}</div>
+    {{/if}}
+    
+    <form action="/loginOrRegister/edit-profile" method="POST">
+        <h3 class="section-title primary">Edit Profile</h3>
+        <!-- Hidden field to store original username -->
+        <input type="hidden" name="originalUsername" value="{{profile.username}}">
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="fullName" class="form-label">Full Name *</label>
+                    <input type="text" class="form-control" id="fullName" name="fullName" 
+                           value="{{profile.fullName}}" required>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username *</label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           value="{{profile.username}}" required>
+                    <small class="text-muted">Choose a unique username</small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="birthday" class="form-label">Birthday *</label>
+                    <input type="date" class="form-control" id="birthday" name="birthday" 
+                           value="{{formatDate profile.birthday 'input'}}" 
+                           min="1900-01-01" max="2030-12-31" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="displayEmail" 
+                           value="{{profile.email}}" disabled>
+                    <small class="text-muted">Email cannot be changed</small>
+                    <!-- Hidden field to preserve email for form submission -->
+                    <input type="hidden" name="email" value="{{profile.email}}">
+                </div>
+            </div>
+        </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="/admin?user={{profile.username}}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </div>
+    </form>
+</div>
