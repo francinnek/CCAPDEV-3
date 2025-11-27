@@ -26,6 +26,9 @@
                     <td>{{this.selectedSeat}}</td>
                     <td>
                         <span class="badge bg-success">{{this.status}}</span>
+                        {{#if this.isCheckedIn}}
+                        <span class="badge bg-success">Checked In</span>
+                        {{/if}}
                     </td>
                     <td>
                         <a href="/reservations/{{this._id}}{{#if ../profile.username}}?user={{../profile.username}}{{/if}}" class="btn btn-primary btn-sm">View Details</a>

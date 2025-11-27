@@ -142,6 +142,9 @@ app.use('/admin/users', userRoleAuth('admin'), usersRoutes);
 app.use('/loginOrRegister', loginRegController);
 app.use('/book', userRoleAuth('user'), bookingRoutes);
 
+// For now, the check-in is public, do we need to add userRoleAuth('user')???
+app.use('/', require('./routes/checkinRoutes'));
+
 // TEMPORARY route to server.js to fix existing users. Not included in the final submission!!
 /*app.get('/fix-passwords', async (req, res) => {
     try {

@@ -52,7 +52,18 @@ const bookingSchema = new mongoose.Schema({
     status: {
         type: String,
         default: 'confirmed'
-    }
+    },
+    isCheckedIn: {
+        type: Boolean,
+        default: false
+    },
+
+    boardingPassNumber: {
+        type: String,
+        unique: true
+    },
+ 
+
 }, {
     timestamps: true
 });
