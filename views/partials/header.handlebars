@@ -1,0 +1,57 @@
+<header>
+    <div class="header-container">
+        <div class="brand">
+            <img src="/sprites/dlsu-airlines.png" class="header-logo" alt="DLSU Airlines Logo">
+            <h1>DLSU Airlines</h1>
+        </div>
+            <nav>
+  {{!-- Dashboard link shows when a user is logged in --}}
+  {{#if profile}}
+    <a href="/admin" class="{{#if active.dashboard}}active{{/if}}">
+      Dashboard
+    </a>
+  {{else}}
+    <a href="/loginOrRegister/login">Dashboard</a>
+  {{/if}}
+
+  {{#if profile}}
+    <a href="/flights/search" class="{{#if active.search}}active{{/if}}">
+      Search Flights
+    </a>
+    <a href="/flights/avail" class="{{#if active.book}}active{{/if}}">
+      Book Flight
+    </a>
+    <a href="/reservations">
+      My Reservations
+    </a>
+  {{else}}
+    <a href="/flights/search" class="{{#if active.search}}active{{/if}}">
+      Search Flights
+    </a>
+    <a href="/flights/avail" class="{{#if active.book}}active{{/if}}">
+      Book Flight
+    </a>
+    <a href="/reservations">
+      My Reservations
+    </a>
+  {{/if}}
+  
+  <a href="#" class="navbar-nav-link"
+     data-bs-toggle="offcanvas"
+     data-bs-target="#profileOffcanvas"
+     aria-controls="profileOffcanvas">
+    Profile
+  </a>
+</nav>
+
+
+    </div>
+</header>
+
+{{> profileToggle}}
+
+{{!-- MongoDB setup
+  Username: onlineAirTicketing_db_user
+  Password: zdN3TAD08vgG6UZU
+  SRV: mongodb+srv://onlineAirlineTicketing_db_user:zdN3TAD08vgG6UZU@cluster0.tujzo55.mongodb.net/
+   --}}

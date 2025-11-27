@@ -1,0 +1,47 @@
+<div class="offcanvas offcanvas-start" tabindex="-1" id="profileOffcanvas" aria-labelledby="profileOffcanvasLabel">
+    <div class="header-container">
+        <div class="brand">
+            <img src="/sprites/dlsu-airlines.png" class="header-logo" alt="DLSU Airlines Logo">
+            <h3>DLSU Airlines</h3>
+        </div>
+    </div>
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="profileOffcanvasLabel">{{profile.fullName}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        {{#if profile}}
+            <!-- If user is logged in, show profile info -->
+            <div>
+                <p>Birthdate: {{formatDate profile.birthday}}</p>
+                <p>Member (Y/N): {{#if profile.isMember}}Yes{{else}}No{{/if}}</p>
+                <p>Some text as placeholder. You can have the elements you have chosen. Like, text, images, lists, etc.</p>
+            </div>
+        {{else}}
+            <!-- If user is not logged in, show guest info -->
+            <div>
+                <p>Profile</p>
+                <p>Name: Guest User</p>
+                <p>Birthdate: Not available</p>
+                <p>Member (Y/N): No</p>
+                <p>Please log in to access your full profile information and settings.</p>
+            </div>
+        {{/if}}
+        
+        <div class="dropdown mt-3">
+            <button class="btn btn-register dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Settings
+            </button>
+            <ul class="dropdown-menu">
+                {{#if profile}}
+                    <li><a class="dropdown-item" href="/loginOrRegister/logout">Log out</a></li>
+                    <li><a class="dropdown-item" href="/loginOrRegister/change-password">Change password</a></li>
+                    <li><a class="dropdown-item" href="/loginOrRegister/edit-profile">Edit profile</a></li>
+                {{else}}
+                    <li><a class="dropdown-item" href="/loginOrRegister/login">Log in</a></li>
+                    <li><a class="dropdown-item" href="/loginOrRegister/register">Create Account</a></li>
+                {{/if}}
+            </ul>
+        </div>
+    </div>
+</div>
