@@ -11,10 +11,9 @@
         <p><strong>Departure:</strong> {{booking.flightDeparture}}</p>
         <p><strong>Status:</strong> 
         <span class="badge bg-success">Confirmed</span>
-        {{#if this.isCheckedIn}}
+        {{#if booking.isCheckedIn}}
         <span class="badge bg-success">Checked In</span>
-        {{/if}}
-        </p>
+        {{/if}}</p>
         <div class="mt-3">
             <a href="/reservations{{#if profile.username}}?user={{profile.username}}{{/if}}" class="btn btn-secondary">Back to List</a>
             <a href="/bookings/{{booking._id}}/edit{{#if profile.username}}?user={{profile.username}}{{/if}}" class="btn btn-warning">Modify Reservation</a>
