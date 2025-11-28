@@ -3,6 +3,7 @@ const session = require('express-session');
 const Profile = require('../models/Profile');
 const Booking = require('../models/Booking');
 const validation = require('../utils/validation');
+const saveLog = require('./logger');
 
 // 🔐 Pre-save hook to hash password before saving
 async function hashPassword(password) {
@@ -10,7 +11,7 @@ async function hashPassword(password) {
         const salt = await bcrypt.genSalt(10);
         return bcrypt.hash(password, salt);
     } catch (error) {
-        console.error('❌ Error hashing password:', error);
+        console.error('Error hashing password:', error);
         return null;
     }
 };
@@ -20,7 +21,7 @@ async function comparePassword(plainPassword, hashedPassword) {
     try {
         return await bcrypt.compare(plainPassword, hashedPassword);
     } catch (error) {
-        console.error('❌ Error comparing password:', error);
+        console.error('Error comparing password:', error);
         return null;
     }
 };
@@ -32,6 +33,7 @@ const authController = {
 
             // SERVER-SIDE VALIDATION
             if (!username || !password) {
+                saveLog(req.session.user.username,`❌ User ${req.session.user.email} left username and/or password fields empty.`);
                 return res.render('loginform', { 
                     error: 'Username and password are required' 
                 });
@@ -40,6 +42,7 @@ const authController = {
             // Validate username format
             const usernameValidation = validation.validateUsername(username);
             if (!usernameValidation.isValid) {
+                saveLog(req.session.user.username, `❌ Invalid username entered by ${req.session.user.email}.`);
                 return res.render('loginform', { 
                     error: usernameValidation.error 
                 });
@@ -47,12 +50,14 @@ const authController = {
 
             // Validate password is not empty
             if (typeof password !== 'string' || password.length === 0) {
+                saveLog(req.session.user.username,`❌ User ${req.session.user.email} left password fields empty.`);
                 return res.render('loginform', { 
                     error: 'Password cannot be empty' 
                 });
             }
 
             if (password.length > 128) {
+                saveLog(req.session.user.username,`❌ User ${req.session.user.email} entered an invalid password format.`);
                 return res.render('loginform', { 
                     error: 'Invalid password format' 
                 });
@@ -71,11 +76,11 @@ const authController = {
                     isMember: user.isMember
                 };
             
-                console.log(`✅ User successfully logged in: ${user.username}`);
+                saveLog(req.session.user.username,`✅ User ${req.session.user.email} successfully logged in!`);
                 res.redirect(`/admin?user=${encodeURIComponent(user.username)}`); 
 
             } else {
-                console.log(`❌ User log in unsuccessful: ${username}`);
+                saveLog(req.session.user.username,`❌ User log in unsuccessful: ${req.session.user.email}`);
                 res.render('loginform', { 
                     error: 'Invalid username or password' 
                 });
@@ -110,6 +115,7 @@ const authController = {
             });
 
             if (!registrationValidation.isValid) {
+                saveLog(req.session.user.username,`❌ Invalid registration data entered by ${req.session.user.email}.`);
                 return res.render('register', {
                     error: registrationValidation.errors.join(', '),
                     formData: { fullName, username, birthday, email }
@@ -118,6 +124,7 @@ const authController = {
 
             const registered = await registerUser(fullName, username, birthday, email, password);
             if (registered) {
+                saveLog(req.session.user.username, `✅ User ${req.session.user.email} successfully registered!`);
                 res.redirect('/loginOrRegister/login?message=Registration successful');
             } else {
                 res.render('register', {
@@ -135,12 +142,12 @@ const authController = {
     },
 
     logout: (req, res) => {
+        saveLog(req.session.user.username, `✅ User ${req.session.user.email} successfully logged out.`);
         req.session.destroy((err) => {
             if (err) {
                 console.error('❌ Session destruction error:', err);
             }
             res.redirect('/loginOrRegister/login?message=Logged out successfully');
-            console.log(`✅ User successfully logged out.`);
         });
     },
 
@@ -171,10 +178,11 @@ const authController = {
     changePassword: async (req, res) => {
         try {
             const { username, currentPassword, newPassword, confirmPassword } = req.body;
-            console.log(`🔐 Password change attempt for: ${username}`);
+            saveLog(req.session.user.username, `🔐 Password change attempt for ${username}`);
 
             //SERVER-SIDE VALIDATION
             if (!username || !currentPassword || !newPassword || !confirmPassword) { 
+                saveLog(req.session.user.username,`❗️ All fields are required for password change ${username}`);
                 return res.render('change-password', {
                     title: 'Change Password - DLSU Airlines', 
                     error: 'All fields are required',
@@ -185,6 +193,7 @@ const authController = {
             // Validate password 
             const passwordValidation = validation.validatePassword(newPassword); 
             if (!passwordValidation.isValid) {
+                saveLog(req.session.user.username, `❌ Invalid password format for ${username}`);
                 return res.render('change-password', {
                     title: 'Change Password - DLSU Airlines',
                     error: passwordValidation.error,
@@ -193,7 +202,7 @@ const authController = {
             }
 
             if (newPassword !== confirmPassword) {
-                console.log(`❌ Password mismatch for user: ${username}`);
+                saveLog(req.session.user.username, `❌ Password mismatch for user ${username}`);
                 return res.render('change-password', {
                     title: 'Change Password - DLSU Airlines',
                     error: 'New passwords do not match',
@@ -220,7 +229,7 @@ const authController = {
             // Use bcrypt comparison
             const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
             if (!isCurrentPasswordValid) {
-                console.log(`❌ Incorrect current password for user: ${username}`);
+                saveLog(req.session.user.username, `❌ Incorrect current password for user ${username}`);
                 return res.render('change-password', {
                     title: 'Change Password - DLSU Airlines',
                     error: 'Current password is incorrect',
@@ -240,7 +249,7 @@ const authController = {
                 { password: hashedNewPassword }
             );
 
-            console.log(`✅ Password changed successfully for: ${username}`);
+            saveLog(req.session.user.username, `✅ Password changed successfully for ${username}`);
             res.redirect(`/admin?user=${encodeURIComponent(username)}&message=Password changed successfully`);
 
         } catch (error) {
@@ -292,6 +301,7 @@ const authController = {
             //SERVER-SIDE VALIDATION
             const nameValidation = validation.validateFullName(fullName);
             if (!nameValidation.isValid) {
+                saveLog(req.session.user.username, `❌ Invalid name entered by ${req.session.user.email}.`);
                 return res.render('edit-profile', {
                     title: 'Edit Profile - DLSU Airlines',
                     error: nameValidation.error,
@@ -306,6 +316,7 @@ const authController = {
 
             const usernameValidation = validation.validateUsername(username);
             if (!usernameValidation.isValid) {
+                saveLog(req.session.user.username, `❌ Invalid username entered by ${req.session.user.email}.`);
                 return res.render('edit-profile', {
                     title: 'Edit Profile - DLSU Airlines',
                     error: usernameValidation.error,
@@ -320,6 +331,7 @@ const authController = {
 
             const birthdayValidation = validation.validateBirthday(birthday);
             if (!birthdayValidation.isValid) {
+                saveLog(req.session.user.username, `❗️ Invalid birthday entered by ${req.session.user.email}.`);
                 return res.render('edit-profile', {
                     title: 'Edit Profile - DLSU Airlines',
                     error: birthdayValidation.error,
@@ -334,6 +346,7 @@ const authController = {
 
             const emailValidation = validation.validateEmail(email);
             if (!emailValidation.isValid) {
+                saveLog(req.session.user.username, `❗️ Invalid email entered by ${req.session.user.email}.`);
                 return res.render('edit-profile', {
                     title: 'Edit Profile - DLSU Airlines',
                     error: emailValidation.error,
@@ -347,6 +360,7 @@ const authController = {
             }
 
             if (!fullName || !birthday || !email || !username) {
+                saveLog(req.session.user.username, `❌ All fields are left empty by ${req.session.user.email}.`);
                 return res.render('edit-profile', {
                     title: 'Edit Profile - DLSU Airlines',
                     error: 'All fields are required',
@@ -367,6 +381,7 @@ const authController = {
                 });
 
                 if (existingUsername) {
+                    saveLog(req.session.user.username, `❗️ Username already exists by ${req.session.user.email}.`);
                     return res.render('edit-profile', {
                         title: 'Edit Profile - DLSU Airlines',
                         error: 'Username already exists. Please choose a different one.',
@@ -391,6 +406,7 @@ const authController = {
             );
 
             if (updateResult.modifiedCount === 0) {
+                saveLog(req.session.user.username, `❌ Profile not found or no changes made by ${req.session.user.email}.`);
                 return res.render('edit-profile', {
                     title: 'Edit Profile - DLSU Airlines',
                     error: 'Profile not found or no changes made',
@@ -410,13 +426,14 @@ const authController = {
                         { username: originalUsername },
                         { username: usernameValidation.sanitized }
                     );
-                    console.log('✅ Successfully updated username in bookings');
+                    saveLog(req.session.user.username, `✅ User ${req.session.user.email} successfully updated username in bookings`);
                 } catch (bookingError) {
                     console.error('⚠️ Could not update bookings (might not exist):', bookingError);
                 }
             }
 
             // Redirect back to admin with success message and NEW username
+            saveLog(req.session.user.username, `✅ User ${req.session.user.email} successfully updated profile!`);
             res.redirect(`/admin?user=${encodeURIComponent(usernameValidation.sanitized)}&message=Profile updated successfully`);
 
         } catch (error) {
@@ -488,6 +505,7 @@ async function registerUser(fullName, username, birthday, email, password) {
         await newProfile.save();
         // SECURITY LOGGING
         console.log(`🔐 SECURITY: User registered: ${username} ${isAdminEmail ? '(ADMIN)' : '(Regular User)'}.`);
+        saveLog(req.session.user.username, `🔐 User ${req.session.user.email} successfully registered!`);
         return true;
     } catch (err) {
         console.error("❌ SECURITY: Registration error:", err.message);

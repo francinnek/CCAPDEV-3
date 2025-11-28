@@ -1,4 +1,5 @@
 const Flight = require('../models/Flight');
+const saveLog = require('./logger');
 
 const adminController = {
     // Show admin dashboard
@@ -14,8 +15,9 @@ const adminController = {
         try {
             const flights = await Flight.find().sort({ departureTime: 1 });
             res.json(flights);
-            console.log(`✅ All flights fetched successfully.`);
+            saveLog(req.session.user.username, `✅ All flights fetched successfully for ${req.session.user.email}.`);
         } catch (error) {
+            saveLog(req.session.user.username, `❌ Error fetching flights for ${req.session.user.email}.`);
             console.error('❌ Error fetching flights:', error);
             res.status(500).json({ error: 'Failed to fetch flights' });
         }
@@ -38,8 +40,10 @@ const adminController = {
 
             await newFlight.save();
             console.log(`✅ Flight created successfully.`);
+            saveLog(req.session.user.username, `✅ Flight created successfully for ${req.session.user.email}.`);
             res.json({ success: true, message: 'Flight created successfully', flight: newFlight });
         } catch (error) {
+            saveLog(req.session.user.username, `❌ Error creating flight for ${req.session.user.email}.`);
             console.error('❌ Error creating flight:', error);
             res.status(500).json({ error: 'Failed to create flight' });
         }
@@ -69,9 +73,10 @@ const adminController = {
                 return res.status(404).json({ error: 'Flight not found' });
             }
 
-            console.log(`✅ Flight updated successfully.`);
+            saveLog(req.session.user.username, `✅ Flight updated successfully for ${req.session.user.email}.`);
             res.json({ success: true, message: 'Flight updated successfully', flight: updatedFlight });
         } catch (error) {
+            saveLog(req.session.user.username, `❌ Error updating flight for ${req.session.user.email}.`);
             console.error('❌ Error updating flight:', error);
             res.status(500).json({ error: 'Failed to update flight' });
         }
@@ -88,9 +93,10 @@ const adminController = {
                 return res.status(404).json({ error: 'Flight not found' });
             }
 
-            console.log(`✅ Flight deleted successfully.`);
+            saveLog(req.session.user.username, `✅ Flight deleted successfully for ${req.session.user.email}.`);
             res.json({ success: true, message: 'Flight deleted successfully' });
         } catch (error) {
+            saveLog(req.session.user.username, `❌ Error deleting flight for ${req.session.user.email}.`);
             console.error('❌ Error deleting flight:', error);
             res.status(500).json({ error: 'Failed to delete flight' });
         }
@@ -106,9 +112,10 @@ const adminController = {
                 return res.status(404).json({ error: 'Flight not found' });
             }
 
-            console.log(`✅ getFlight successful.`);
+            saveLog(req.session.user.username, `✅ getFlight successful for ${req.session.user.email}.`);
             res.json(flight);
         } catch (error) {
+            saveLog(req.session.user.username, `❌ Error fetching flight for ${req.session.user.email}.`);
             console.error('❌ Error fetching flight:', error);
             res.status(500).json({ error: 'Failed to fetch flight' });
         }

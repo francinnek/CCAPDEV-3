@@ -2,6 +2,7 @@
 const Booking = require('../models/Booking');
 const validation = require('../utils/validation');
 const userRoleAuth = require('../userAuth-middleware/userRoleAuth');
+const saveLog = require('./logger');
 
 // Render bookings page
 exports.renderBookingsPage = async (req, res) => {
@@ -33,8 +34,10 @@ exports.getAllBookings = async (req, res) => {
     };
 
     const bookings = await Booking.find().lean();
+    saveLog(req.session.user.username,`✅ ${req.session.user.email} successfully retrieved all bookings!`);
     res.status(200).json(bookings);
   } catch (err) {
+    saveLog(req.session.user.username,`❌ ${req.session.user.email} failed to retrieve the bookings.`);
     console.error('Error loading bookings:', err);
     res.status(500).json({ message: 'Error loading bookings. Please try again.' });
   }
@@ -66,7 +69,10 @@ exports.getBookingById = async (req, res) => {
     }
 
     res.status(200).json(booking);
+    saveLog(req.session.user.username, `✅ ${req.session.user.email} successfully retrieved all bookings!`);
+    
   } catch (err) {
+    saveLog(req.session.user.username, `❌ ${req.session.user.email} failed to retrieve a booking.`);
     console.error('Error fetching booking:', err);
     res.status(400).json({ error: 'Invalid booking ID' });
   }

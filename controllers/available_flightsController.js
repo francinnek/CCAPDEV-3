@@ -3,6 +3,7 @@ const router = express.Router();
 const Flight = require('../models/Available_Flight');
 const Profile = require('../models/Profile');
 const userRoleAuth = require('../userAuth-middleware/userRoleAuth');
+const saveLog = require('./logger');
 
 router.get('/search', userRoleAuth('user'), async (req, res) => {
     try {
@@ -19,7 +20,6 @@ router.get('/search', userRoleAuth('user'), async (req, res) => {
                     { email: username }
                 ]
             }).lean();
-           // console.log('✅ Profile found:', profile ? `YES (${profile.username})` : 'NO');
         }
         
         res.render('searchPage', {
@@ -27,7 +27,7 @@ router.get('/search', userRoleAuth('user'), async (req, res) => {
             active: { search: true },
             profile: profile 
         });
-        console.log(`✅ Successful render of search page.`);
+        console.log (`✅ Successful render of search page.`);
     } catch (error) {
         console.error('❌ Error loading search page:', error);
         res.render('searchPage', {
@@ -81,9 +81,10 @@ router.post('/search', userRoleAuth('user'), async (req, res) => {
         
         const flights = await Flight.find(searchQuery).lean();
         res.json(flights);
-        console.log(`✅ Successfully searched for flights.`);
+        saveLog(req.session.user.username, `✅ Successfully searched for flights for ${req.session.user.email}.`);
 
     } catch (error) {
+        saveLog(req.session.user.username, `❌ Error searching flights for ${req.session.user.email}.`);
         console.error('❌ Error searching flights:', error);
         res.status(500).json({ 
             error: 'Error searching flights',
@@ -134,7 +135,7 @@ router.get('/avail', userRoleAuth('user'), async (req, res) => {
             isAdmin: req.session.user.isAdmin === true
         });
 
-        console.log(`✅ Successful render of availableFlights page.`);
+        saveLog(req.session.user.username, `✅ User ${req.session.user.email} successfully looked up on availableFlights page.`);
 
     } catch (error) {
         console.error('Error loading available flights page:', error);

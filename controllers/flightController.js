@@ -1,33 +1,7 @@
 const Available_Flight = require('../models/Available_Flight');
 const Profile = require('../models/Profile');
 const validation = require('../utils/validation');
-
-/* ✅ Helper to get full user profile
-// async function getUserProfile(req) {
-//   if (!req.session.user) return null;
-//   return req.session.user; // Session already has the user data
-  
-//   // if (!req.session.user) return null;
-//   // return await Profile.findOne({
-//   //   $or: [{ username: req.session.user.username }, { email: req.session.user.username }]
-//   // }).lean();
-
-//   // if (!username) return null;
-//   // return await Profile.findOne({
-//   //   $or: [{ username: username }, { email: username }]
-//   // }).lean();
-// }
-
-// ✅ Helper to check if admin
-// async function checkAdminPermission(username) {
-//   try {
-//     const user = await getUserProfile(username);
-//     return user && user.isAdmin === true;
-//   } catch (error) {
-//     console.error('Error checking admin permission:', error);
-//     return false;
-//   }
-// }*/
+const saveLog = require('./logger');
 
 const flightController = {
   // 📘 Get all flights
@@ -51,9 +25,10 @@ const flightController = {
         username: username,
         profile
       });
-      console.log(`✅ Successfully fetched all flights.`);
+      saveLog(req.session.user.username, `✅ User ${req.session.user.email} successfully retrieved all flights.`);
 
     } catch (error) {
+      saveLog(req.session.user.username, `❌ User ${req.session.user.email} failed to retrieve all flights.`);
       console.error('❌ Error fetching flights:', error);
       res.status(500).render('error', {
         title: 'Error',
@@ -220,10 +195,12 @@ const flightController = {
 
       await newFlight.save();
       console.log(`✅ Flight created successfully: ${flightNumValidation.sanitized}`);
+      saveLog(req.session.user.username, `✅ Flight created successfully for ${req.session.user.email}.`);
 
       res.redirect(`/admin/flights?user=${encodeURIComponent(username)}&message=Flight created successfully`);
     } catch (error) {
       console.error('❌ Error creating flight:', error);
+      saveLog(req.session.user.username, `❌ Error creating flight for ${req.session.user.email}.`);
 
       if (error.code === 11000) {
         return res.render('create-flight', {
@@ -420,9 +397,11 @@ const flightController = {
         });
       }
 
-      console.log(`✅ Flight updated successfully: ${flightNumValidation.sanitized}`);
+      console.log(`Flight updated successfully: ${flightNumValidation.sanitized}`);
+      saveLog(req.session.user.username, `✅ Flight updated successfully for ${req.session.user.email}.`);
       res.redirect(`/admin/flights?user=${encodeURIComponent(username)}&message=Flight updated successfully`);
     } catch (error) {
+      saveLog(req.session.user.username, `❌ Error updating flight for ${req.session.user.email}.`);
       console.error('❌ Error updating flight:', error);
       const flight = await Available_Flight.findById(req.params.id).lean();
       res.render('edit-flight', {
@@ -471,12 +450,14 @@ const flightController = {
         });
       }
 
-      console.log(`✅ Flight deleted successfully: ${deletedFlight.flightNumber}`);
+      console.log(`Flight deleted successfully: ${deletedFlight.flightNumber}`);
+      saveLog(req.session.user.username, `✅ Flight deleted successfully for ${req.session.user.email}.`);
       res.json({
         success: true,
         message: 'Flight deleted successfully'
       });
     } catch (error) {
+      saveLog(req.session.user.username, `❌ Error deleting flight for ${req.session.user.email}.`);
       console.error('❌ Error deleting flight:', error);
       res.status(500).json({
         success: false,

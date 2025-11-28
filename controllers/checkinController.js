@@ -1,5 +1,6 @@
 // controllers/checkinController.js
 const Booking = require('../models/Booking');
+const saveLog = require('./logger');
 
 function generateBoardingPass() {
     let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -113,8 +114,9 @@ exports.processCheckIn = async (req, res) => {
       boardingPass: boardingPass,
       booking: updatedBooking
     });
-
+    saveLog(req.session.user.username,`✅ ${req.session.user.email} successfully checked in!`);
   } catch (err) {
+    saveLog(req.session.user.username,`❌ ${req.session.user.email} failed to check in.`);
     console.error('Check-in error:', err);
     res.render('checkin', {
       title: 'Error',

@@ -6,6 +6,8 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 
 const connectDb = require('./config/database');
+// logging.js
+const saveLog = require('./controllers/logger');
 
 const availableFlightsController = require('./controllers/available_flightsController');
 const Available_Flight = require('./models/Available_Flight');
@@ -101,40 +103,6 @@ app.use((req, res, next) => {
 
 */
 
-/* Authentication middleware
-// const requireAuth = (req, res, next) => {
-//     if (req.session.user) {
-//         next();
-//     } else {
-//         console.log(`🔐 SECURITY: Unauthorized access attempt to ${req.originalUrl} from IP: ${req.ip}`);
-//         res.redirect('/loginOrRegister/login?error=Please login first');
-//     }
-// };
-// function userRole(role) {
-//   return function (req, res, next) {
-//     // Example logic using the role
-//     if (req.session.userId && req.session.user.accessrole === role) {
-//       return next();
-//     } else {
-//         req.session.destroy(() => {
-//             res.redirect('/login');
-//         });
-//     }
-//   }
-// };
-
-// const requireAdmin = (req, res, next) => {
-//     if (req.session.user && req.session.user.isAdmin) {
-//         next();
-//     } else {
-//         console.log(`🔐 SECURITY: Unauthorized admin access attempt to ${req.originalUrl} by user: ${req.session.user?.username} from IP: ${req.ip}`);
-//         res.status(403).render('error', {
-//             title: 'Access Denied',
-//             message: 'Admin privileges required'
-//         });
-//     }
-// }; */
-
 /* ===================== ROUTES ====================== */
 app.use('/flights', availableFlightsController);
 app.use('/admin/flights', userRoleAuth('admin'), flightManagementRoutes);
@@ -144,30 +112,6 @@ app.use('/book', userRoleAuth('user'), bookingRoutes);
 
 // For now, the check-in is public, do we need to add userRoleAuth('user')???
 app.use('/', require('./routes/checkinRoutes'));
-
-// TEMPORARY route to server.js to fix existing users. Not included in the final submission!!
-/*app.get('/fix-passwords', async (req, res) => {
-    try {
-        const users = await Profile.find({});
-        let fixedCount = 0;
-        
-        for (let user of users) {
-            // Check if password is not hashed (bcrypt hashes start with $2b$)
-            if (!user.password.startsWith('$2b$')) {
-                const hashedPassword = await bcrypt.hash(user.password, 10);
-                user.password = hashedPassword;
-                await user.save();
-                fixedCount++;
-                console.log(`✅ Fixed password for: ${user.username}`);
-            }
-        }
-        
-        res.send(`Fixed ${fixedCount} user passwords`);
-    } catch (error) {
-        console.error('Error fixing passwords:', error);
-        res.status(500).send('Error fixing passwords');
-    }
-});*/
 
 app.get('/', (req, res) => {
     res.redirect('/loginOrRegister/login'); 
@@ -206,8 +150,10 @@ app.get('/form', userRoleAuth('user'), async (req, res) => {
             profile: profile,
             username: username  // NOW COMES FROM SESSION
         });
+        saveLog(username, `✅ ${req.session?.user?.email || 'unknown'} successfully loaded the form!`);
     } catch (err) {
         console.error('❌ SECURITY: Error loading form:', err);
+        saveLog(username, `❌ ${req.session?.user?.email || 'unknown'} failed to load form.`);
         res.status(500).render('error', {
             title: 'Error',
             message: 'Error loading reservation form'
@@ -243,7 +189,9 @@ app.get('/admin', async (req, res) => {
             username: username,
             message: message
         });
+        //saveLog(username, `✅ ${req.session.user.email} successfully fetched user profile!`);
     } catch (error) {
+        saveLog(username, `❌ ${req.session?.user?.email || 'unknown'} failed to fetch user profile.`);
         console.error('❌ SECURITY: Error fetching user profile:', error);
         res.render('admin', {
             title: 'Admin Dashboard - DLSU Airlines',
@@ -398,9 +346,11 @@ app.get('/reservations', userRoleAuth('user'), async (req, res) => {
             // Filter bookings by username and status
             const query = { status: 'confirmed', username: username };
             bookings = await Booking.find(query).lean();
-            // console.log(`📋 Fetching reservations for user: ${username} - Found ${bookings.length}`);
+            saveLog(username, `📋 Fetching reservations for user: ${username}.`);
         } else {
-            // console.log(`⚠️ No username provided - guest user cannot view reservations`);
+            const guestUsername = 'guest';
+            // guest logging fallback
+            saveLog(req.session?.user?.username || 'guest', `⚠️ Not registered/logged in - guest user cannot view reservations`);
             // Guest users see NO reservations
             bookings = []; // empty array/list of bookings
         }
@@ -410,8 +360,10 @@ app.get('/reservations', userRoleAuth('user'), async (req, res) => {
             bookings: bookings,
             profile: profile
         });
+        saveLog(req.session?.user?.username || username || 'guest', `✅ ${req.session?.user?.email || 'unknown'} successfully retrieved reservations.`);
     } catch (err) {
-        console.error('❌ Error retrieving reservations:', err);
+        saveLog(req.session?.user?.username || username || 'guest', `❌ ${req.session?.user?.email || 'unknown'} failed to retrieve reservations.`);
+        console.error('Error retrieving reservations:', err);
         res.status(500).send('Error retrieving reservations');
     }
 });
@@ -443,7 +395,9 @@ app.get('/bookings', userRoleAuth('user'), async (req, res) => {
         const query = { status: 'confirmed', username: username };
         const bookings = await Booking.find(query).lean();
         res.json(bookings);
+        saveLog(req.session?.user?.username || username || 'guest', `✅ ${req.session?.user?.email || 'unknown'} successfully retrieved the bookings.`);
     } catch (err) {
+        saveLog(req.session?.user?.username || username || 'guest', `❌ ${req.session?.user?.email || 'unknown'} failed to retrieve the bookings.`);
         res.status(500).json({ error: 'Error retrieving bookings' });
     }
 });
@@ -496,8 +450,10 @@ app.post('/bookings', userRoleAuth('user'), async (req, res) => {
         const booking = new Booking(req.body);
         await booking.save();
         res.json({ success: true });
+        saveLog(req.session?.user?.username || username || 'guest', `✅ ${req.session?.user?.email || 'unknown'} successfully created a new booking.`);
     } catch (err) {
-        console.error(`❌ SECURITY: Booking creation failed for user: ${req.session.user?.username}`, err);
+        saveLog(req.session?.user?.username || username || 'guest', `❌ ${req.session?.user?.email || 'unknown'} failed to create a new booking.`);
+        // console.error(`SECURITY: Booking creation failed for user: ${req.session.user?.username}`, err);
         res.status(400).json({ error: err.message });
     }
 });
@@ -578,7 +534,9 @@ app.post('/reservations/:id/cancel', async (req, res) => {
         }
 
         res.redirect('/reservations');
+        saveLog(req.session?.user?.username || username || 'guest', `✅ ${req.session?.user?.email || 'unknown'} successfully cancelled the reservation/booking.`);
     } catch (err) {
+        saveLog(req.session?.user?.username || username || 'guest', `❌ ${req.session?.user?.email || 'unknown'} failed to cancel the reservation.`);
         res.status(500).send('Error cancelling reservation');
     }
 });
