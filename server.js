@@ -304,6 +304,8 @@ app.get('/bookings/:id/edit', userRoleAuth('user'), async (req, res) => {
             });
         }
 
+        
+
         res.render('reservationForm', {
             title: 'Modify Reservation - DLSU Airlines',
             active: { book: true },
@@ -344,7 +346,7 @@ app.get('/reservations', userRoleAuth('user'), async (req, res) => {
             }).lean();
 
             // Filter bookings by username and status
-            const query = { status: 'confirmed', username: username };
+            const query = { status: { $ne: 'cancelled' }, username: username };
             bookings = await Booking.find(query).lean();
             saveLog(username, `📋 Fetching reservations for user: ${username}.`);
         } else {
@@ -391,8 +393,8 @@ app.get('/bookings', userRoleAuth('user'), async (req, res) => {
             // console.log('⚠️ No username provided to /bookings - returning empty array');
             return res.json([]);
         }
-        
-        const query = { status: 'confirmed', username: username };
+        // not equal to cancelled
+        const query = { status: { $ne: 'cancelled' }, username: username };
         const bookings = await Booking.find(query).lean();
         res.json(bookings);
         saveLog(req.session?.user?.username || username || 'guest', `✅ ${req.session?.user?.email || 'unknown'} successfully retrieved the bookings.`);
