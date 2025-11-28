@@ -1,0 +1,2 @@
+[2025-11-28T13:47:43.234Z] ✅ Flight created successfully for undefined.
+[2025-11-28T13:56:11.063Z] ✅ Flight created successfully for undefined.

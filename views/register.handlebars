@@ -1,0 +1,59 @@
+<div class="logo-container">
+    <img src="/sprites/dlsu-airlines.png" class="logo-image" alt="DLSU Airlines Logo">
+</div>
+<div class="container">
+    <form id="registerForm"action="/loginOrRegister/register" method="POST" novalidate>
+        <div class="container">
+            <h3 class="section-title primary">Registration</h3>
+
+            {{#if error}}
+                <div class="alert alert-danger">{{error}}</div>
+            {{/if}}
+
+            <!-- Personal Details -->
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="fullName" value="{{formData.fullName}}" placeholder="Last Name, First Name" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{formData.username}}" required>
+            </div>
+            <div class="mb-3">
+                <label for="birthday" class="form-label">Birthday</label>
+                <input type="date" class="form-control" id="birthday" name="birthday" value="{{formData.birthday}}" min="1900-01-01" max="2030-12-31" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{formData.email}}">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="confPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confPassword" name="confPassword" required>
+            </div>
+            <div class="button-container loginregbuttons">
+                <button type="submit" class="btn btn-login">Register</button>
+                <a href="/loginOrRegister/login" class="btn btn-register">Back to login</a>
+            </div>
+
+            {{#if profile}}
+                <div class="mb-3">
+                    <label for="name" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{formData.username}}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="confPassword" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="confPassword" name="confPassword" required>
+                </div>
+            {{/if}}
+        </div>
+    </form>
+</div>

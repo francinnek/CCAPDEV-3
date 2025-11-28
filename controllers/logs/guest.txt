@@ -1,0 +1,5 @@
+[2025-11-28T13:55:30.813Z] ❌ User unknown left username and/or password fields empty.
+[2025-11-28T13:56:10.300Z] ❌ User unknown left username and/or password fields empty.
+[2025-11-28T14:01:44.330Z] 🔐 Password change attempt for undefined
+[2025-11-28T14:01:44.332Z] ❗️ All fields are required for password change undefined
+[2025-11-28T14:03:22.914Z] ❌ User log in unsuccessful: unknown
